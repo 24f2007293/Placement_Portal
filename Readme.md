@@ -1,0 +1,1 @@
+This is a placement portal application to give a platform for students and companies alike to make the hiring process smooth.
