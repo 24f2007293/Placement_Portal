@@ -1,8 +1,10 @@
 from sqlalchemy import Integer
-from app import db
+from extensions import db
 import datetime
+from flask_login import UserMixin
+from werkzeug.security import generate_password_hash,check_password_hash
 
-class User(db.Model):
+class User(db.Model,UserMixin):
     __tablename__='users'
     id=db.Column(db.Integer,primary_key=True,nullable=False,unique=True)
     email=db.Column(db.String(150),unique=True,nullable=False,index=True)
@@ -14,6 +16,11 @@ class User(db.Model):
     #Making connection with student profiles and company profiles
     student_profiles=db.relationship('Student_Profiles',backref='user',uselist=False)
     company_profiles=db.relationship('Company_Profiles',backref='user',uselist=False)
+    #making the hashing part of the model for initialising the password and making it 
+    def set_password(self,password):
+        self.password=generate_password_hash(password)
+    def check_password(self,password):
+        return check_password_hash(self.password,password)
 
 class Student_Profiles(db.Model):
     __tablename__='student_profiles'
@@ -31,9 +38,9 @@ class Company_Profiles(db.Model):
     __tablename__='company_profiles'
     user_id=db.Column(db.Integer,db.ForeignKey('users.id'),primary_key=True,nullable=False,unique=True)
     company_name=db.Column(db.String(150),nullable=False,unique=True,index=True)
-    hr_name=db.Column(db.String(150))
+    hr_number=db.Column(db.Integer,nullable=False)
     website_url = db.Column(db.String(300), nullable=True)
-    approval_status=db.Column(db.String(100),nullable=True)
+    approval_status=db.Column(db.String(100),nullable=False,default=False)
     #Relationship between comapny_profiles and placement drives (in simple ForeignKey attribute we use the table name and in the relationship we use the class name)
     drives=db.relationship('Placement_Drives',backref='company',lazy=True)
 

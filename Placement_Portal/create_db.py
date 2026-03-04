@@ -16,6 +16,7 @@ with app.app_context():
         admin = User(email="admin@portal.com",
             password=generate_password_hash("admin123"),
             role="admin",
+            is_approved=True,
             is_active=True)
         db.session.add(admin)
         db.session.commit() 

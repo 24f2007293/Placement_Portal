@@ -3,9 +3,29 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
+    <title>Admin Dashboard</title>
 </head>
 <body>
-    This is the admin dashboard
+    <h1 style="text-align: center;">Admin Dashboard</h1>
+    <div>
+        <h3>Registered Companies</h3>
+        {%for com in com%}
+        {{com.company_name}} <a href="">Blacklist</a>
+        {%endfor%}
+    </div>
+    <br>
+    <div>
+        <h3>Registered Students</h3>
+        {%for st in students%}
+        {{st.first_name}} {{st.last_name}}
+        <a href="">Blacklist</a>
+        {%endfor%}
+    </div>
+    <div>
+        <h3>Company Applications</h3>
+        {%for com in com_apply%}
+        {{com.company_name}} <a href="{{ url_for('approve_company', company_id=com.user_id) }}">Accept</a>
+        {%endfor%}
+    </div>
 </body>
 </html>

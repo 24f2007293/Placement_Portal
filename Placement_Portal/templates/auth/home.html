@@ -1,0 +1,10 @@
+{% extends "auth/Base_form.html" %}
+{% block title %}Home Page{% endblock %}
+{% block content %}
+<h2>Login</h2>
+<a href="{{url_for('login')}}"> Click here to login</a>
+<h2>Register as Student</h2>
+<a href="{{url_for('student_reg')}}">Click here to land a job</a>
+<h2>Register as Company</h2>
+<a href="{{url_for('company_reg')}}">Click here to grow your employee base</a>
+{% endblock %}

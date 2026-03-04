@@ -1,0 +1,39 @@
+{% extends "auth/Base_form.html" %}
+{% block title %}Registration Registration Page{% endblock %}
+{% block content %}
+<h2>Student Registration</h2>
+<form class="row g-3" method="POST" enctype="multipart/form-data">
+  <div class="col-md-6">
+    <label for="inputEmail4" class="form-label">Email</label>
+    <input type="email" name="email" class="form-control" id="inputEmail4" required>
+  </div>
+  <div class="col-md-6">
+    <label for="inputPassword4" class="form-label">Password</label>
+    <input type="password" name ="password" class="form-control" id="inputPassword4" required>
+  </div>
+  <div class="input-group">
+    <span class="input-group-text">First and last name</span>
+    <input type="text" name="first_name" aria-label="First name" class="form-control" required>
+    <input type="text" name="last_name" aria-label="Last name" class="form-control" required>
+  </div>
+  <div class="col-12">
+    <label for="CGPA" class="form-label">CGPA</label>
+    <input type="float" class="form-control" id="CGPA" name="cgpa">
+  </div>
+  <div class="col-12">
+    <label for="department_name" class="form-label">Department</label>
+    <input type="text" name="department_name" class="form-control" id="dept_name" placeholder="Computer Science,Data Science, or Electrical">
+  </div>
+  <div class="col-md-6">
+    <label for="graduation_year" class="form-label">Graduation Year</label>
+    <input type="number" name="graduation_year" class="form-control" id="Graduation_year">
+  </div>
+  <div class="input-group mb-3">
+    <label class="input-group-text" for="inputGroupFile01">CV/Resume</label>
+    <input type="file" name="resume" class="form-control" id="Resume">
+  </div>
+  <div class="col-12">
+    <button type="submit" class="btn btn-primary">Register</button>
+  </div>
+</form>
+{% endblock %}
