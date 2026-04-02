@@ -12,7 +12,7 @@ class User(db.Model,UserMixin):
     role=db.Column(db.String(150),nullable=False)
     is_active=db.Column(db.Boolean,default=True)
     is_approved=db.Column(db.Boolean,default=True,nullable=True)
-    created_at=db.Column(db.DateTime,default=datetime.datetime.utcnow())
+    created_at=db.Column(db.DateTime,default=datetime.datetime.utcnow)
     #Making connection with student profiles and company profiles
     student_profiles=db.relationship('Student_Profiles',backref='user',uselist=False)
     company_profiles=db.relationship('Company_Profiles',backref='user',uselist=False)
@@ -38,9 +38,9 @@ class Company_Profiles(db.Model):
     __tablename__='company_profiles'
     user_id=db.Column(db.Integer,db.ForeignKey('users.id'),primary_key=True,nullable=False,unique=True)
     company_name=db.Column(db.String(150),nullable=False,unique=True,index=True)
-    hr_number=db.Column(db.Integer,nullable=False)
+    hr_number=db.Column(db.String(150),nullable=False)
     website_url = db.Column(db.String(300), nullable=True)
-    approval_status=db.Column(db.String(100),nullable=False,default=False)
+    approval_status=db.Column(db.Enum('pending','approved','rejected',name="approval_status"),nullable=False,default='pending')
     #Relationship between comapny_profiles and placement drives (in simple ForeignKey attribute we use the table name and in the relationship we use the class name)
     drives=db.relationship('Placement_Drives',backref='company',lazy=True)
 
@@ -49,12 +49,12 @@ class Placement_Drives(db.Model):
     id=db.Column(db.Integer,primary_key=True,unique=True)
     job_title=db.Column(db.String(100),nullable=True)
     company_id=db.Column(db.Integer,db.ForeignKey('company_profiles.user_id'),nullable=False)
+    eligibility=db.Column(db.String,nullable=False)
     description=db.Column(db.String(150),nullable=True)
     ctc_package=db.Column(db.Float,nullable=False)
     application_deadline=db.Column(db.DateTime)
-    status=db.Column(db.String(150))
-
-    rules=db.relationship('Drive_Eligibility_Rules',backref='drive',uselist='False')
+    approval=
+    status=db.Column(db.Enum('pending','approved','rejected',name="approval_status"),nullable=False,default='pending')
     applications = db.relationship('Applications_Table',backref='drive',lazy=True)
     
 class Drive_Eligibility_Rules(db.Model):
@@ -62,6 +62,7 @@ class Drive_Eligibility_Rules(db.Model):
     drive_id=db.Column(db.Integer,db.ForeignKey('placement_drives.id'),primary_key=True)
     min_cgpa=db.Column(db.Float,nullable=False)
     allowed_departments=db.Column(db.String(150))
+    
     #make relationships
 
 class Applications_Table(db.Model):
@@ -71,5 +72,7 @@ class Applications_Table(db.Model):
     drive_id=db.Column(db.Integer,db.ForeignKey('placement_drives.id'))
     applied_at=db.Column(db.DateTime,default=datetime.datetime.utcnow)
     status=db.Column(db.String(150))
+    #Constraint to ensure a student can apply only once to a particular drive
+    __table_args__ = (db.UniqueConstraint('student_id', 'drive_id'),)
 
 #Done with the models now, establish relations

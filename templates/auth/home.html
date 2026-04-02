@@ -1,6 +1,10 @@
 {% extends "auth/Base_form.html" %}
 {% block title %}Home Page{% endblock %}
 {% block content %}
+<nav class="navbar navbar-dark bg-dark px-3">
+    <span class="navbar-brand">Placement Portal</span>
+</nav>
+
 <h2>Login</h2>
 <a href="{{url_for('login')}}"> Click here to login</a>
 <h2>Register as Student</h2>

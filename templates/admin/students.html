@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard</title>
+</head>
+<body>
+    {%extends "auth/base_form.html"%}
+    {%block content%}
+    <div>
+        <table class="table table-bordered w-100">
+        <h4>Registered Students</h4>
+        <tr><th>Student Name</th><th>Action</th></tr>
+        {%for st in students%}
+        <tr><td>{{st.first_name}} {{st.last_name}}</td><td><a href="{{url_for('blacklist_user',user_id=st.user_id)}}">Blacklist</a></td></tr>
+        {%endfor%}
+        </table>
+    </div>
+
+
+
+    {%endblock%}
+</body>
+</html>

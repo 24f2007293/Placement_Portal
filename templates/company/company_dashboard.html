@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Company Dashboard</title>
+</head>
+<body>
+    {%extends "auth/base_form.html"%}
+    {%block content%}
+    <h1>Company Dashboard</h1>
+    <p>Welcome, {{ current_user.company_profiles.company_name }}!</p>
+    {%endblock%}
+    
+</body>
+</html>

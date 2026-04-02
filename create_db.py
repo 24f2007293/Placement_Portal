@@ -1,4 +1,4 @@
-#this file if for creating a database
+#this file is for creating a database
 
 from app import app, db
 from models import User

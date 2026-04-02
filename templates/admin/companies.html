@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard</title>
+</head>
+<body>
+    {%extends "auth/base_form.html"%}
+    {%block content%}
+    <div>
+        <table class="table table-bordered w-100">
+        <h4>Registered Companies</h4>
+        <tr><th>Company Name</th><th>Action</th></tr>
+        {%for com in com%}
+        <tr><td>{{com.company_name}}</td><td><a href="{{url_for('blacklist_user',user_id=com.user_id)}}" method="POST">Blacklist</a></td></tr>
+        {%endfor%}
+        </table>
+    </div>
+    <br>
+    <div>
+        <table class="table table-bordered w-100">
+        <h4>Company Applications</h4>
+        <tr><th>Company Name</th><th colspan="2">Actions</th></tr>
+        {%for com in com_apply%}
+        <tr><td>{{com.company_name}}</td><td><a href="{{ url_for('approve_company', company_id=com.user_id) }}" class="btn btn-success">Accept</a></td><td><a href="{{url_for('reject_company',company_id=com.user_id)}}" class="btn btn-danger">Reject</a></td></tr>
+        {%endfor%}
+        </table>
+    </div>
+
+
+    {%endblock%}
+</body>
+</html>

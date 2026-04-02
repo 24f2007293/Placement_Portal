@@ -1,0 +1,16 @@
+"filename", "language", "HTML", "Python", "Database", "PostCSS", "comment", "blank", "total"
+"c:\Users\Acer\Desktop\Placement_Portal\Placement_Portal\app.py", "Python", 0, 112, 0, 0, 11, 30, 153
+"c:\Users\Acer\Desktop\Placement_Portal\Placement_Portal\create_db.py", "Python", 0, 17, 0, 0, 3, 5, 25
+"c:\Users\Acer\Desktop\Placement_Portal\Placement_Portal\extensions.py", "Python", 0, 4, 0, 0, 0, 1, 5
+"c:\Users\Acer\Desktop\Placement_Portal\Placement_Portal\instance\placement.db", "Database", 0, 0, 85, 0, 0, 2, 87
+"c:\Users\Acer\Desktop\Placement_Portal\Placement_Portal\models.py", "Python", 0, 61, 0, 0, 6, 9, 76
+"c:\Users\Acer\Desktop\Placement_Portal\Placement_Portal\static\style.css", "PostCSS", 0, 0, 0, 18, 0, 0, 18
+"c:\Users\Acer\Desktop\Placement_Portal\Placement_Portal\templates\admin_dashboard.html", "HTML", 34, 0, 0, 0, 0, 0, 34
+"c:\Users\Acer\Desktop\Placement_Portal\Placement_Portal\templates\auth\Base_form.html", "HTML", 18, 0, 0, 0, 0, 1, 19
+"c:\Users\Acer\Desktop\Placement_Portal\Placement_Portal\templates\auth\company_reg.html", "HTML", 44, 0, 0, 0, 0, 2, 46
+"c:\Users\Acer\Desktop\Placement_Portal\Placement_Portal\templates\auth\home.html", "HTML", 10, 0, 0, 0, 0, 0, 10
+"c:\Users\Acer\Desktop\Placement_Portal\Placement_Portal\templates\auth\login.html", "HTML", 32, 0, 0, 0, 1, 2, 35
+"c:\Users\Acer\Desktop\Placement_Portal\Placement_Portal\templates\auth\student_reg.html", "HTML", 39, 0, 0, 0, 0, 0, 39
+"c:\Users\Acer\Desktop\Placement_Portal\Placement_Portal\templates\company_dashboard.html", "HTML", 11, 0, 0, 0, 0, 0, 11
+"c:\Users\Acer\Desktop\Placement_Portal\Placement_Portal\templates\student_dashboard.html", "HTML", 11, 0, 0, 0, 0, 0, 11
+"Total", "-", 199, 194, 85, 18, 21, 52, 569

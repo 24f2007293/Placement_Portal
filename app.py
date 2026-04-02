@@ -1,4 +1,4 @@
-from flask import Flask
+from flask import Flask,flash
 from flask_sqlalchemy import SQLAlchemy
 from extensions import *
 from datetime import datetime
@@ -15,6 +15,7 @@ app.config['SQLALCHEMY_DATABASE_URI']='sqlite:///placement.db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS']=False
 app.secret_key='123'
 
+#db initialization 
 db.init_app(app)
 
 from flask_login import LoginManager
@@ -26,9 +27,12 @@ login_manager.login_view="login"
 def load_user(user_id):
     return User.query.get(int(user_id))
 
+#----------------------------------------Auth Routes-------------------------------------------------------------------
+
 @app.route('/')
 def home():
     return render_template('auth/home.html')
+
 
 @app.route('/login',methods=["GET","POST"])
 def login():
@@ -40,20 +44,31 @@ def login():
         
 
         user=User.query.filter_by(email=email).first()
+
         if user and user.check_password(password):
             if user.role=="company" and not user.is_approved:
-                return "Waiting for admin approval"
+                flash("Company verification is under process !! Please Try Again later.","warning")
+                return redirect(url_for("login"))
             login_user(user)
             if user.role=="admin":
+                login_user(user)
+                flash("Logged in!!","success")
                 return redirect(url_for("admin_dashboard"))
-            elif user.role == "company":
+            
+            elif user.role == "company" and user.is_approved==True:
+                login_user(user)
+                flash("Logged in!!","success")
                 return redirect(url_for("company_dashboard"))
-            elif user.role == "student":
+            elif user.role == "student" and user.is_approved==True:
+                login_user(user)
+                flash("Logged in!!","success")
                 return redirect(url_for("student_dashboard"))
-        
-        login_user(user)
+            else:
+                logout_user()
+                flash("You are blacklisted for malicious activity","danger")
 
     return render_template('auth/login.html')
+
 
 @app.route('/company_reg',methods=["POST","GET"])
 def company_reg():
@@ -65,11 +80,12 @@ def company_reg():
         user.set_password(password)   #this set password is the function we made under the user function to make the password hashable and then store it
         db.session.add(user)
         db.session.flush()
-        company=Company_Profiles(user_id=user.id,company_name=request.form["company_name"],hr_number=request.form["hr_num"],website_url=request.form["website_url"])
+        company=Company_Profiles(user_id=user.id,company_name=request.form["company_name"],approval_status="pending",hr_number=request.form["hr_num"],website_url=request.form["website_url"])
         db.session.add(company)
         db.session.commit()
         return redirect(url_for("login"))
     return render_template('auth/company_reg.html')
+
 
 @app.route('/student_reg',methods=["GET","POST"])
 def student_reg():
@@ -108,6 +124,8 @@ def student_reg():
         return redirect(url_for("login"))
     
     return render_template('auth/student_reg.html')
+
+#--------------------------------------------Admin-------------------------------------------------------------
 #Routes to take you to the dashboards
 @app.route('/admin_dashboard')
 @login_required
@@ -116,18 +134,25 @@ def admin_dashboard():
         return "Unauthorized",403
     #In this admin dashboard when we will call it it will run some functions which will give us the names of different categories
     students=Student_Profiles.query.all()
-    com_apply=Company_Profiles.query.filter_by(approval_status=False)
-    com=Company_Profiles.query.filter_by(approval_status=True)
-    return render_template('admin_dashboard.html',com_apply=com_apply,
-                           students=students,com=com)
+    
+    #To get the total number of fields at the home page
+    total_companies = Company_Profiles.query.filter_by(approval_status="approved").count()
+    total_students = User.query.filter_by(role='student').count()
+    unapproved_companies = Company_Profiles.query.filter_by(approval_status="pending").count()
+    pending_drives = Placement_Drives.query.filter_by(status='pending').count()
+    ongoing_drives = Placement_Drives.query.filter_by(status='active').count()
+    total_applications = Applications_Table.query.count()
+    return render_template('admin/admin_dashboard.html',students=students,total_companies=total_companies,total_students=total_students,unapproved_companies=unapproved_companies,
+                           pending_drives=pending_drives,ongoing_drives=ongoing_drives,total_applications=total_applications)
 
-@app.route('/student_dashboard')
-def student_dashboard():
-    return render_template('student_dashboard.html')
 
-@app.route('/company_dashboard')
-def company_dashboard():
-    return render_template('company_dashboard.html')
+@app.route('/admin_dashboard/companies')
+@login_required
+def admin_comp():
+    com_apply=Company_Profiles.query.filter_by(approval_status="pending")
+    com=Company_Profiles.query.filter_by(approval_status="approved")
+
+    return render_template("admin/companies.html",com_apply=com_apply,com=com)
 
 #Button for admin authorization of company
 @app.route("/admin/approve/<int:company_id>")
@@ -140,11 +165,64 @@ def approve_company(company_id):
     company = Company_Profiles.query.get(company_id)
 
     if company:
-        company.approval_status = True
+        company.approval_status = "approved"
         company.user.is_approved = True   # if you also store it in users table
         db.session.commit()
 
     return redirect(url_for("admin_dashboard"))
+
+#Button for admin rejection
+@app.route("/admin/reject_company/<int:company_id>")
+@login_required
+def reject_company(company_id):
+    if current_user.role !="admin":
+        return "Unauthorized",403
+    company=Company_Profiles.query.get(company_id)
+    if company:
+        company.approval_status="rejected"
+        db.session.commit()
+        flash("Company Rejected Successfully","danger")
+        return redirect(url_for("admin_dashboard"))
+
+#blacklist button
+@app.route("/admin/blacklist_user/<int:user_id>")
+def blacklist_user(user_id):
+    user=User.query.get(user_id)
+    user.is_approved=False
+    db.session.commit()
+    return redirect(request.referrer)
+
+
+
+
+#-----------------------------------------------------Student-------------------------------
+@app.route('/student_dashboard')
+def student_dashboard():
+    return render_template('student/student_dashboard.html')
+
+
+
+
+
+
+
+
+#----------------------Company-------------------------
+@app.route('/company_dashboard')
+def company_dashboard():
+    return render_template('company/company_dashboard.html')
+
+
+
+
+
+#------------------------------Navbar------------------------------
+#logout button
+@app.route('/logout')
+@login_required
+def logout():
+    logout_user()
+    return redirect(url_for('login'))
 
 if __name__=='__main__':
     app.run(debug=True)
