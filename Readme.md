@@ -13,5 +13,9 @@ Fixed the company authentication by routing the unauthouthorised company to the 
 started working on the 3rd milestone 
 -Made the nav bar with the conditions applied
 -Make the company dashboard and connect info for drives
-## 2 April - Mar-2025
--Make the links to edit company and student profile
+## 3 April
+made the blacklisted function for the company,students
+-Completed the drive verification and activation
+
+## 4 april
+### Work on the search feature 

@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard</title>
+</head>
+<body>
+    {%extends "auth/base_form.html"%}
+    {%block content%}
+
+
+      <h1>Create a Drive</h1>
+  <form class="row g-3" method="POST" >
+    <div class="col-md-6">
+      <label for="drive_name" class="form-label">Drive Name</label>
+      <input name="drive_name"type="text" class="form-control" id="drive_name" required>
+    </div>
+    <div class="col-md-6">
+      <label for="Job_title" class="form-label">Job Title</label>
+      <input type="text" class="form-control" name="job_title" id="job_title" required>
+    </div>
+    <div class="col-12">
+      <label for="job_type" class="form-label">Job Type</label>
+      <select name="job_type" id="job_type">
+          <option value="Internship">Internship</option>
+          <option value="Fulltime">Fulltime</option>
+          <option value="Apprenticeship">Apprenticeship</option>
+      </select>
+    </div>
+    <div class="col-12">
+      <label for="cgpa" class="form-label">Required CGPA</label>
+      <input type="number" step="0.01" class="form-control" name="cgpa" id="cgpa">
+    </div>
+    <div class="col-12">
+      <label for="ctc" class="form-label">CTC-Package</label>
+      <input type="number" step="0.01" class="form-control" name="ctc" id="ctc">
+    </div>
+    <div class="col-12">
+      <label for="location" class="form-label">Location</label>
+      <input type="text" class="form-control" name="location" id="location">
+    </div>
+      <div class="col-md-6">
+      <label for="description" class="form-label">Job Description</label>
+      <textarea name="description" class="form-control" id="description"  required></textarea>
+    </div>
+    <div>
+      <label for="deadline" class="form-label">Application Deadline</label>
+      <input type="date" class="form-control" name="application_deadline" id="application_deadline" required>
+    </div>
+
+    <div class="col-12">
+      <div class="form-check">
+        <input class="form-check-input" type="checkbox" id="gridCheck" required>
+        <label class="form-check-label" for="gridCheck">
+          Is all the information valid ?
+        </label>
+      </div>
+    </div>
+    <div class="col-12">
+      <button type="submit" class="btn btn-primary">Register</button>
+    </div>
+  </form>
+</div>
+    {%endblock%}
+</body>
+</html>

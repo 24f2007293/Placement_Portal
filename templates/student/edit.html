@@ -1,0 +1,37 @@
+{% extends "auth/Base_form.html" %}
+{% block title %}Student Registration Page{% endblock %}
+{% block content %}
+<nav class="navbar navbar-dark bg-dark px-3">
+    <span class="navbar-brand">Placement Portal</span>
+</nav>
+
+<h2>Student Edit</h2>
+<form class="row g-3" method="POST" enctype="multipart/form-data">
+  <div class="input-group">
+    <span class="input-group-text">First and last name</span>
+    <input type="text" name="first_name" aria-label="First name" class="form-control" value="{{current_user.student_profiles.first_name}}" required>
+    <input type="text" name="last_name" aria-label="Last name" value="{{current_user.student_profiles.last_name}}" class="form-control" required>
+  </div>
+  <div class="col-12">
+    <label for="CGPA" class="form-label">CGPA</label>
+    <input type="float" class="form-control" id="CGPA" value="{{current_user.student_profiles.cgpa}}" name="cgpa">
+  </div>
+  <div class="col-12">
+    <label for="department_name" class="form-label">Department</label>
+    <input type="text" name="department_name" class="form-control" value="{{current_user.student_profiles.department_name}}" id="dept_name" placeholder="Computer Science,Data Science, or Electrical">
+  </div>
+  <div class="col-md-6">
+    <label for="graduation_year" class="form-label">Graduation Year</label>
+    <input type="number" name="graduation_year" value="{{current_user.student_profiles.graduation_year}}" class="form-control" id="Graduation_year">
+  </div>
+  <div class="input-group mb-3">
+    <label class="input-group-text" for="inputGroupFile01">CV/Resume</label>
+    <input type="file" name="resume" class="form-control" id="Resume">
+  </div>
+  <div class="col-12">
+    <a href="{{url_for('student_dashboard')}}" class="btn btn-secondary">Back</a>
+    <button type="submit" class="btn btn-primary">Save</button>
+  </div>
+</form>
+
+{% endblock %}

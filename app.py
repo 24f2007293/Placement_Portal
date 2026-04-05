@@ -1,7 +1,8 @@
 from flask import Flask,flash
 from flask_sqlalchemy import SQLAlchemy
+from sqlalchemy import or_
 from extensions import *
-from datetime import datetime
+import datetime
 from flask import render_template, request,redirect,url_for,session
 from models import *
 import os
@@ -63,9 +64,11 @@ def login():
                 login_user(user)
                 flash("Logged in!!","success")
                 return redirect(url_for("student_dashboard"))
-            else:
+            elif user.is_approved==False:
                 logout_user()
                 flash("You are blacklisted for malicious activity","danger")
+            else:
+                flash('Invalid Credentials',"danger")
 
     return render_template('auth/login.html')
 
@@ -139,20 +142,89 @@ def admin_dashboard():
     total_companies = Company_Profiles.query.filter_by(approval_status="approved").count()
     total_students = User.query.filter_by(role='student').count()
     unapproved_companies = Company_Profiles.query.filter_by(approval_status="pending").count()
-    pending_drives = Placement_Drives.query.filter_by(status='pending').count()
-    ongoing_drives = Placement_Drives.query.filter_by(status='active').count()
+    pending_drives = Placement_Drives.query.filter_by(drive_status='pending').count()
+    ongoing_drives = Placement_Drives.query.filter_by(drive_status='active').count()
     total_applications = Applications_Table.query.count()
     return render_template('admin/admin_dashboard.html',students=students,total_companies=total_companies,total_students=total_students,unapproved_companies=unapproved_companies,
                            pending_drives=pending_drives,ongoing_drives=ongoing_drives,total_applications=total_applications)
 
-
+#navbar link to companies page
 @app.route('/admin_dashboard/companies')
 @login_required
 def admin_comp():
-    com_apply=Company_Profiles.query.filter_by(approval_status="pending")
-    com=Company_Profiles.query.filter_by(approval_status="approved")
-
+    q=request.args.get("q")
+    if q:
+        com_apply=Company_Profiles.query.filter(Company_Profiles.approval_status=="pending",
+                                                or_(Company_Profiles.company_name.ilike(f"{q}%"))).all()
+        com = Company_Profiles.query.filter(
+        Company_Profiles.approval_status == "approved",or_(
+            Company_Profiles.company_name.ilike(f"{q}%"))).all()
+    
+    else:
+        com_apply=Company_Profiles.query.filter_by(approval_status="pending").all()
+        com=Company_Profiles.query.filter_by(approval_status="approved").all()
     return render_template("admin/companies.html",com_apply=com_apply,com=com)
+
+#navbar link to students page
+@app.route("/admin_dashboard/students")
+@login_required
+def admin_students():
+    q=request.args.get('q')
+    if q:
+        students=Student_Profiles.query.filter(or_(Student_Profiles.first_name.ilike(f"{q}%"),Student_Profiles.last_name.ilike(f"{q}%"),
+                                                   Student_Profiles.department_name.ilike(f"{q}%")
+                                                   )
+                                                   ).all()
+    else:
+        students=Student_Profiles.query.all()
+    return render_template("admin/students.html",Students=students)
+
+#navbar link to drives link
+@app.route("/admin_dashboard/drives")
+@login_required
+def admin_drives():
+    pending=Placement_Drives.query.filter_by(drive_status="pending")
+    active=Placement_Drives.query.filter_by(drive_status="active")
+    closed=Placement_Drives.query.filter_by(drive_status="closed")
+    rejected=Placement_Drives.query.filter_by(drive_status="rejected")
+
+    return render_template("admin/drives.html",pending=pending,active=active,closed=closed,rejected=rejected)
+#functions for drive management
+@app.route("/admin_dashboard/drives/approve/<int:d_id>")
+@login_required
+def approve_drive(d_id):
+    if current_user.role!="admin":
+        return "Unauthorized",403
+    drive=Placement_Drives.query.get(d_id)
+    if drive:
+        drive.drive_status="active"
+        db.session.commit()
+        flash("A Drive Started","success")
+    else:
+        flash("invalid operation","information")
+    return redirect(url_for("admin_drives"))
+
+@app.route("/admin_dashboard/drives/reject/<int:d_id>")
+@login_required
+def reject_drive(d_id):
+    if current_user.role!="admin":
+        return "Unauthorized",403
+    drive=Placement_Drives.query.get(d_id)
+    if drive:
+        drive.drive_status="rejected"
+        db.session.commit()
+        flash("A Drive Rejected","danger")
+    else:
+        flash("invalid operation","information")
+    return redirect(url_for("admin_drives"))
+    
+
+
+#navbar link to job applications
+@app.route("/admin_dashboard/applications")
+@login_required
+def admin_applications():
+    return render_template("admin/applications.html")
 
 #Button for admin authorization of company
 @app.route("/admin/approve/<int:company_id>")
@@ -169,7 +241,7 @@ def approve_company(company_id):
         company.user.is_approved = True   # if you also store it in users table
         db.session.commit()
 
-    return redirect(url_for("admin_dashboard"))
+    return redirect(url_for("admin_comp"))
 
 #Button for admin rejection
 @app.route("/admin/reject_company/<int:company_id>")
@@ -182,7 +254,7 @@ def reject_company(company_id):
         company.approval_status="rejected"
         db.session.commit()
         flash("Company Rejected Successfully","danger")
-        return redirect(url_for("admin_dashboard"))
+        return redirect(url_for("admin_comp"))
 
 #blacklist button
 @app.route("/admin/blacklist_user/<int:user_id>")
@@ -190,6 +262,16 @@ def blacklist_user(user_id):
     user=User.query.get(user_id)
     user.is_approved=False
     db.session.commit()
+    flash("User Blacklisted!!","danger")
+    return redirect(request.referrer)
+
+#whitelist
+@app.route("/admin/whitelist_user/<int:user_id>")
+def whitelist_user(user_id):
+    user=User.query.get(user_id)
+    user.is_approved=True
+    db.session.commit()
+    flash("User Whitelisted!!","information")
     return redirect(request.referrer)
 
 
@@ -199,6 +281,32 @@ def blacklist_user(user_id):
 @app.route('/student_dashboard')
 def student_dashboard():
     return render_template('student/student_dashboard.html')
+
+@app.route('/student_dashboard/edit_profile', methods=['GET', 'POST'])
+@login_required
+def edit_sprofile():
+    student = Student_Profiles.query.get(current_user.id)
+
+    if request.method == 'POST':
+        student.first_name = request.form.get('first_name')
+        student.last_name = request.form.get('last_name')
+        student.cgpa = request.form.get('cgpa')
+        student.department_name = request.form.get('department_name')
+        student.graduation_year = request.form.get('graduation_year')
+
+        # handle file upload
+        file = request.files.get('resume')
+        if file and file.filename:
+            filepath = os.path.join('static/resumes', file.filename)
+            file.save(filepath)
+            student.resume_path = filepath
+
+        db.session.commit()
+
+        return redirect(url_for('student_dashboard'))
+
+    return render_template('student/edit.html', student=student)
+
 
 
 
@@ -210,7 +318,30 @@ def student_dashboard():
 #----------------------Company-------------------------
 @app.route('/company_dashboard')
 def company_dashboard():
-    return render_template('company/company_dashboard.html')
+    company_id=current_user.id
+    return render_template('company/company_dashboard.html',company_id=company_id)
+
+@app.route("/company_dashboard/create_drive/<int:company_id>",methods=['GET','POST'])
+@login_required
+def create_drive(company_id):
+    if request.method=='POST':
+        drive=Placement_Drives(drive_name=request.form.get('drive_name'),
+                               job_title=request.form.get('job_title'),
+                               job_type=request.form.get('job_type'),
+                               cgpa=float(request.form.get('cgpa')),
+                               description=request.form.get('description'),
+                               application_deadline=datetime.datetime.strptime(request.form.get('application_deadline'), "%Y-%m-%d").date(),
+                               location=request.form.get('location'),
+                               ctc=float(request.form.get('ctc')),
+                               company_id=company_id)
+                               #adding company id from current_user
+                               
+        db.session.add(drive)
+        db.session.commit()
+        flash("Drive Created Successfully","success")
+        return redirect(url_for('company_dashboard'))
+    return render_template("company/create_drive.html",company_id=company_id)
+
 
 
 

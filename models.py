@@ -46,24 +46,23 @@ class Company_Profiles(db.Model):
 
 class Placement_Drives(db.Model):
     __tablename__='placement_drives'
+    #columns taken by form
+    drive_name=db.Column(db.String(150),unique=False,nullable=False)
+    job_title=db.Column(db.String(100),nullable=False)
+    job_type=db.Column(db.Enum("Internship","Fulltime","Apprenticeship",name="job_type"),nullable=False)
+    cgpa=db.Column(db.Float,nullable=False)
+    description=db.Column(db.Text,nullable=False)
+    application_deadline=db.Column(db.Date,nullable=False,index=True)
+    location=db.Column(db.String(100))
+    ctc=db.Column(db.Float,nullable=False)
     id=db.Column(db.Integer,primary_key=True,unique=True)
-    job_title=db.Column(db.String(100),nullable=True)
-    company_id=db.Column(db.Integer,db.ForeignKey('company_profiles.user_id'),nullable=False)
-    eligibility=db.Column(db.String,nullable=False)
-    description=db.Column(db.String(150),nullable=True)
-    ctc_package=db.Column(db.Float,nullable=False)
-    application_deadline=db.Column(db.DateTime)
-    approval=
-    status=db.Column(db.Enum('pending','approved','rejected',name="approval_status"),nullable=False,default='pending')
-    applications = db.relationship('Applications_Table',backref='drive',lazy=True)
+    #managed by backend
+    company_id=db.Column(db.Integer,db.ForeignKey('company_profiles.user_id'),nullable=False,index=True)
+    #these functions will be used to keep track of time of creation and modification of drive.
+    is_deleted = db.Column(db.Boolean, default=False)
+    drive_status=db.Column(db.Enum('pending','active','closed','rejected',name="drive_status"),nullable=False,default='pending',index=True)
+    applications = db.relationship('Applications_Table',backref='drive',lazy="dynamic")
     
-class Drive_Eligibility_Rules(db.Model):
-    __tablename__='drive_eligibility_rules'
-    drive_id=db.Column(db.Integer,db.ForeignKey('placement_drives.id'),primary_key=True)
-    min_cgpa=db.Column(db.Float,nullable=False)
-    allowed_departments=db.Column(db.String(150))
-    
-    #make relationships
 
 class Applications_Table(db.Model):
     __tablename__='applications_table'

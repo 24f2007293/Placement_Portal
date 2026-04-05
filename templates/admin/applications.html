@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Company Dashboard</title>
+    <title>Admin Dashboard</title>
 </head>
 <body>
     {%extends "auth/base_form.html"%}
@@ -11,18 +11,20 @@
                             <nav class="navbar navbar-dark bg-dark px-3">
                     <div class="d-flex align-items-center justify-content-between w-100 text-white">
                             <span style="text-align: right;">
-                                Welcome {{ current_user.company_profiles.company_name }} !
+                                <a href="{{url_for('admin_dashboard')}}" style="text-decoration: none;">Welcome Admin !!</a>
                             </span>
                             <span style="text-align: left;">
+                                <a href="{{url_for('admin_comp')}}" class="btn btn-outline-light btn-sm">Companies</a>
+                                <a href="{{url_for('admin_students')}}" class="btn btn-outline-light btn-sm">Students</a>
+                                <a href="{{url_for('admin_drives')}}" class="btn btn-outline-light btn-sm">Drives</a>
+                                <a href="{{url_for('admin_dashboard')}}" class="btn btn-outline-light btn-sm">Home</a>
                                 <a href="{{url_for('logout')}}" class="btn btn-danger btn-sm">Logout</a>
                             </span>
                     </div>
                 </nav>
-    <h1>Company Dashboard</h1>
-    <a href="{{url_for('create_drive',company_id=current_user.id) }}" class="btn btn-outline-primary">
-        Create Drive
-    </a>
+    Student Applications
+
+
     {%endblock%}
-    
 </body>
 </html>

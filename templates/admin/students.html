@@ -8,12 +8,44 @@
 <body>
     {%extends "auth/base_form.html"%}
     {%block content%}
+                            <nav class="navbar navbar-dark bg-dark px-3">
+                    <div class="d-flex align-items-center justify-content-between w-100 text-white">
+                            <span style="text-align: right;">
+                                <a href="{{url_for('admin_students')}}" style="text-decoration: none; color: white;">Welcome Admin !!</a>
+                            </span>
+                            <span class="d-flex" style="text-align: left;">
+                                <form method="GET" action="{{url_for('admin_students')}}" >
+                                    <div class="input-group align-items-center" >
+                                        <input class="py-0 " style="width: 150px; border-color: black;" type="search" name="q" placeholder="Name or branch of student" >
+                                        <div class="input-group-text p-0 me-4 bg-dark" style="border: none;">
+                                            <button type="submit" class="input-group-text p-0 me-1 bg-dark" style="border: none;">
+                                                🔍
+                                            </button>
+                                        </div>
+                                    </div>
+                                </form>
+                                <a href="{{url_for('admin_comp')}}" class="btn btn-outline-light btn-sm">Companies</a>
+                                <a href="{{url_for('admin_dashboard')}}" class="btn btn-outline-light btn-sm">Home</a>
+                                <a href="{{url_for('admin_drives')}}" class="btn btn-outline-light btn-sm">Drives</a>
+                                <a href="{{url_for('admin_applications')}}" class="btn btn-outline-light btn-sm">Job Applications</a>
+                                <a href="{{url_for('logout')}}" class="btn btn-danger btn-sm">Logout</a>
+                            </span>
+                    </div>
+                </nav>
+
     <div>
         <table class="table table-bordered w-100">
         <h4>Registered Students</h4>
         <tr><th>Student Name</th><th>Action</th></tr>
-        {%for st in students%}
-        <tr><td>{{st.first_name}} {{st.last_name}}</td><td><a href="{{url_for('blacklist_user',user_id=st.user_id)}}">Blacklist</a></td></tr>
+        {%for st in Students%}
+        <tr>
+            <td>{{st.first_name}} {{st.last_name}}</td>
+            {%if st.user.is_approved==True%}
+            <td><a href="{{url_for('blacklist_user',user_id=st.user_id)}}">Blacklist</a></td>
+            {%else%}
+            <td><a href="{{url_for('whitelist_user',user_id=st.user_id)}}">Whitelist</a> </td>
+            {%endif%}
+        </tr>
         {%endfor%}
         </table>
     </div>

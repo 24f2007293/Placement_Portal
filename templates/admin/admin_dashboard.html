@@ -6,27 +6,24 @@
     <title>Admin Dashboard</title>
 </head>
 <body>
-                    <nav class="navbar navbar-dark bg-dark px-3">
-                    <span class="navbar-brand">Placement Portal</span>
-                    <div class="d-flex align-items-center justify-content-between w-100 text-white">
-                            <span style="text-align: right;">
-                                Welcome Admin
-                            </span>
-                            <div>
-                                <a href="{{url_for('admin_comp')}}" class="btn btn-outline-light btn-sm">Companies</a>
-                            <span>
-                                <a href="{{url()}}"
-                            </span>
-                            </div>
-                        {%endif%}
-
-                    </div>
-                    
-                    {% endif %}
-        
-                </nav>
     {%extends "auth/base_form.html"%}
     {%block content%}
+                        <nav class="navbar navbar-dark bg-dark px-3">
+                    <div class="d-flex align-items-center justify-content-between w-100 text-white">
+                            <span style="text-align: right;">
+                                Welcome Admin !!
+                            </span>
+                            <span style="text-align: left;">
+                                <a href="{{url_for('admin_comp')}}" class="btn btn-outline-light btn-sm">Companies</a>
+                                <a href="{{url_for('admin_students')}}" class="btn btn-outline-light btn-sm">Students</a>
+                                <a href="{{url_for('admin_drives')}}" class="btn btn-outline-light btn-sm">Drives</a>
+                                <a href="{{url_for('admin_applications')}}" class="btn btn-outline-light btn-sm">Job Applications</a>
+                                <a href="{{url_for('logout')}}" class="btn btn-danger btn-sm">Logout</a>
+                            </span>
+                    </div>
+                </nav>
+
+
     <h1 style="text-align: center;">Admin Dashboard</h1>
         <div>
             <div class="row">
