@@ -34,7 +34,7 @@
             <td>{{a.job_type}}</td>
             <td>Setup later</td>
             <td>
-                
+                <a href="{{ url_for('close_drive', d_id=a.id) }}" class="btn btn-danger btn-sm">Close Drive</a>
             </td>
 
         </tr>

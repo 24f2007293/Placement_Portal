@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Drive Details</title>
+</head>
+<body>
+    {% extends "auth/base_form.html" %}
+    {% block content %}
+        <div class="container py-4">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <div>
+                    <h1 class="mb-1">{{ drive.drive_name }}</h1>
+                    <p class="text-muted mb-0">Drive details and applications</p>
+                </div>
+                <a href="{{ url_for('company_dashboard') }}" class="btn btn-outline-secondary">Back to Dashboard</a>
+            </div>
+
+            <div class="card mb-4">
+                <div class="card-body">
+                    <h5 class="card-title">{{ drive.job_title }}</h5>
+                    <p class="card-text"><strong>Job Type:</strong> {{ drive.job_type }}</p>
+                    <p class="card-text"><strong>Location:</strong> {{ drive.location }}</p>
+                    <p class="card-text"><strong>CTC:</strong> {{ drive.ctc }}</p>
+                    <p class="card-text"><strong>CGPA Required:</strong> {{ drive.cgpa }}</p>
+                    <p class="card-text"><strong>Deadline:</strong> {{ drive.application_deadline }}</p>
+                    <p class="card-text"><strong>Status:</strong> {{ drive.drive_status }}</p>
+                    <p class="card-text"><strong>Description:</strong> {{ drive.description }}</p>
+                </div>
+            </div>
+
+
+
+            <div>
+                <h3 class="mb-3">Received Applications</h3>
+                {% if applications %}
+                    <div class="table-responsive">
+                        <table class="table table-bordered table-striped align-middle">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Student Name</th>
+                                    <th>Applied On</th>
+                                    <th>Current Status</th>
+                                    <th width="300px;">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for app in applications %}
+                                    <tr>
+                                        <td>
+                                            <strong>{{ app.student.first_name }} {{ app.student.last_name }}</strong>
+                                            <div class="text-muted small">{{ app.student.user.email }}</div>
+                                        </td>
+                                        <td>{{ app.applied_at.strftime('%Y-%m-%d %H:%M') }}</td>
+                                        <td>
+                                            <span class="badge 
+                                                {% if app.status == 'applied' %}bg-secondary
+                                                {% elif app.status == 'shortlisted' %}bg-info
+                                                {% elif app.status == 'selected' %}bg-success
+                                                {% elif app.status == 'rejected' %}bg-danger
+                                                {% endif %}">
+                                                {{ app.status|capitalize }}
+                                            </span>
+                                        </td>
+                                        <td>
+                                            <div class="d-flex gap-2 align-items-center justify-content-end">
+                                                <form method="POST" action="{{ url_for('update_application_status', app_id=app.id) }}" class="d-flex gap-2">
+                                                    <select name="status" class="form-select form-select-sm" style="max-width: 150px;">
+                                                        <option value="">Change Status...</option>
+                                                        <option value="shortlisted" {% if app.status == 'shortlisted' %}selected{% endif %}>Shortlist</option>
+                                                        <option value="selected" {% if app.status == 'selected' %}selected{% endif %}>Select</option>
+                                                        <option value="rejected" {% if app.status == 'rejected' %}selected{% endif %}>Reject</option>
+                                                        <option value="applied" {% if app.status == 'applied' %}selected{% endif %}>Mark as Applied</option>
+                                                    </select>
+                                                    <button type="submit" class="btn btn-sm btn-primary">Update</button>
+                                                </form>
+                                                
+                                                <button type="button" class="btn btn-sm btn-info" data-bs-toggle="modal" data-bs-target="#modal{{ app.student.id }}">
+                                                    View Details
+                                                </button>
+                                            </div>
+                                    <div class="modal fade" id="modal{{ app.student.id }}" tabindex="-1">
+                                        <div class="modal-dialog">
+                                            <div class="modal-content p-3">
+
+                                                <h4>{{ app.student.first_name }} {{ app.student.last_name }}</h4>
+                                                <p><strong>Email:</strong> {{ app.student.user.email }}</p>
+                                                <p><strong>CGPA:</strong> {{ app.student.cgpa }}</p>
+                                                <p><strong>Graduation Year:</strong> {{ app.student.graduation_year }}</p>
+                                                <p><strong>Resume:</strong> 
+                                                    {% if app.student.resume_path %}
+                                                        <a href="{{ url_for('static', filename=app.student.resume_path.replace('static/', '').replace('\\', '/')) }}" target="_blank" class="btn btn-sm btn-outline-primary">View Resume</a>
+                                                    {% else %}
+                                                        <span class="text-muted">No resume uploaded</span>
+                                                    {% endif %}
+                                                <div class="mt-3">
+                                                    <button class="btn btn-secondary" data-bs-dismiss="modal">
+                                                        Close
+                                                    </button>
+                                                </div>
+
+                                            </div>
+                                        </div>
+                                    </div>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                {% else %}
+                    <p class="text-muted">No applications have been received yet.</p>
+                {% endif %}
+            </div>
+        </div>
+    {% endblock %}
+</body>
+</html>

@@ -1,6 +1,6 @@
-from flask import Flask,flash
+from flask import Flask,flash,abort
 from flask_sqlalchemy import SQLAlchemy
-from sqlalchemy import or_
+from sqlalchemy import or_,and_
 from extensions import *
 import datetime
 from flask import render_template, request,redirect,url_for,session
@@ -19,7 +19,7 @@ app.secret_key='123'
 #db initialization 
 db.init_app(app)
 
-from flask_login import LoginManager
+from flask_login import LoginManager, login_user, logout_user, current_user, login_required
 login_manager=LoginManager()
 login_manager.init_app(app)
 login_manager.login_view="login"
@@ -83,7 +83,7 @@ def company_reg():
         user.set_password(password)   #this set password is the function we made under the user function to make the password hashable and then store it
         db.session.add(user)
         db.session.flush()
-        company=Company_Profiles(user_id=user.id,company_name=request.form["company_name"],approval_status="pending",hr_number=request.form["hr_num"],website_url=request.form["website_url"])
+        company=Company_Profiles(user_id=user.id,company_name=request.form["company_name"],approval_status="pending",hr_number=request.form["hr_num"],website_url=request.form["website_url"],description=request.form.get('description'))
         db.session.add(company)
         db.session.commit()
         return redirect(url_for("login"))
@@ -224,7 +224,9 @@ def reject_drive(d_id):
 @app.route("/admin_dashboard/applications")
 @login_required
 def admin_applications():
-    return render_template("admin/applications.html")
+    applications = Applications_Table.query.all()
+
+    return render_template("admin/applications.html", applications=applications)
 
 #Button for admin authorization of company
 @app.route("/admin/approve/<int:company_id>")
@@ -278,10 +280,67 @@ def whitelist_user(user_id):
 
 
 #-----------------------------------------------------Student-------------------------------
-@app.route('/student_dashboard')
-def student_dashboard():
-    return render_template('student/student_dashboard.html')
 
+#this route for redirecting us to the student dashboard and processing the applications and active drive status
+@app.route('/student_dashboard')
+@login_required
+def student_dashboard():
+    if current_user.role!='student':
+        abort(403)
+    #this will give us the active drives.
+    drives= Placement_Drives.query.filter_by(drive_status="active").all()
+    print(drives)
+    #we also want to show the registered application the current student did , toh pehle ham ek variable mai uss student ki user_id lenge and then filter out his application
+    student_profile=current_user.student_profiles
+    applications=Applications_Table.query.filter_by(student_id=student_profile.user_id).all()
+
+    # the very first table will be made of the companies so use that to maek the very first tables
+    """ the reason why we are using join is that it will only gives those companies 
+    which have a drive under there name else it wont be shown to us  """
+    companies=Company_Profiles.query.join(Placement_Drives).filter(Placement_Drives.drive_status=="active").distinct().all()
+
+
+
+    return render_template('student/student_dashboard.html',drives=drives,applications=applications,companies=companies)
+
+#View Company page routing :
+def is_profile_complete(student):
+    return bool(
+        student and
+        student.first_name and
+        student.last_name and
+        student.cgpa is not None and
+        student.department_name and
+        student.graduation_year and
+        student.resume_path
+    )
+
+
+
+#Viewing company and then being applied
+@app.route('/student_dashboard/view_company/<int:company_id>')
+@login_required
+def view_company(company_id):
+    if current_user.role != 'student':
+        abort(403)
+
+    company = Company_Profiles.query.get_or_404(company_id)
+    com_drives = Placement_Drives.query.filter_by(
+        company_id=company.user_id,
+        drive_status="active").all()
+    profile_complete = is_profile_complete(current_user.student_profiles)
+    if not profile_complete:
+        flash("Please complete your profile before applying to drives.", "warning")
+    return render_template('student/view_com.html',company=company,drives=com_drives,profile_complete=profile_complete)
+
+@app.route('/student_dashboard/view_company/<int:drive_id>')
+@login_required
+def view_drive(drive_id):
+    drives=Placement_Drives.query.get_or_404(drive_id)
+
+    return render_template('student/view_drive')
+
+#Route for editing student profiles
 @app.route('/student_dashboard/edit_profile', methods=['GET', 'POST'])
 @login_required
 def edit_sprofile():
@@ -302,10 +361,45 @@ def edit_sprofile():
             student.resume_path = filepath
 
         db.session.commit()
+        flash("Profile Updated","success")
 
         return redirect(url_for('student_dashboard'))
+    
 
     return render_template('student/edit.html', student=student)
+
+
+#route for the student to apply
+
+@app.route('/apply/<int:drive_id>', methods=['POST'])
+@login_required
+def apply(drive_id):
+    student_profile = current_user.student_profiles
+    if not is_profile_complete(student_profile):
+        flash("Please complete your profile before applying.", "warning")
+        return redirect(url_for('edit_sprofile'))
+
+    student_id = student_profile.user_id
+
+    existing = Applications_Table.query.filter_by(
+        student_id=student_id,
+        drive_id=drive_id
+    ).first()
+
+    if existing:
+        flash("Already applied","warning")
+        return redirect(url_for('student_dashboard'))
+
+    application = Applications_Table(
+        student_id=student_id,
+        drive_id=drive_id,
+        status="applied"
+    )
+
+    db.session.add(application)
+    db.session.commit()
+
+    return redirect(url_for('student_dashboard'))
 
 
 
@@ -316,10 +410,69 @@ def edit_sprofile():
 
 
 #----------------------Company-------------------------
+
 @app.route('/company_dashboard')
+@login_required
 def company_dashboard():
-    company_id=current_user.id
-    return render_template('company/company_dashboard.html',company_id=company_id)
+    # Show company dashboard with separate upcoming and closed drives
+    if current_user.role != 'company':
+        abort(403)
+
+    company_id = current_user.id
+    upcoming_drives = Placement_Drives.query.filter(
+        Placement_Drives.company_id == company_id,
+        Placement_Drives.drive_status != 'closed'
+    ).all()
+    closed_drives = Placement_Drives.query.filter_by(
+        company_id=company_id,
+        drive_status='closed'
+    ).all()
+
+    return render_template(
+        'company/company_dashboard.html',
+        company_id=company_id,
+        upcoming_drives=upcoming_drives,
+        closed_drives=closed_drives
+    )
+
+@app.route('/company_dashboard/drive/<int:drive_id>')
+@login_required
+def company_drive_details(drive_id):
+    # Show a single drive's details and received applications
+    if current_user.role != 'company':
+        abort(403)
+
+    drive = Placement_Drives.query.get_or_404(drive_id)
+    if drive.company_id != current_user.id:
+        abort(403)
+
+    applications = drive.applications.all()
+    return render_template('company/drive_details.html', drive=drive, applications=applications)
+
+@app.route('/company_dashboard/application/<int:app_id>/status', methods=['POST'])
+@login_required
+def update_application_status(app_id):
+    # Update application status (only for company that owns the drive)
+    if current_user.role != 'company':
+        abort(403)
+    
+    application = Applications_Table.query.get_or_404(app_id)
+    drive = application.drive
+    
+    if drive.company_id != current_user.id:
+        abort(403)
+    
+    new_status = request.form.get('status')
+    if new_status in ['applied', 'shortlisted', 'selected', 'rejected']:
+        application.status = new_status
+        db.session.commit()
+        flash(f"Application status updated to {new_status}", "success")
+    else:
+        flash("Invalid status", "danger")
+    
+    return redirect(url_for('company_drive_details', drive_id=drive.id))
+
+
 
 @app.route("/company_dashboard/create_drive/<int:company_id>",methods=['GET','POST'])
 @login_required
@@ -343,9 +496,37 @@ def create_drive(company_id):
     return render_template("company/create_drive.html",company_id=company_id)
 
 
+#Function to activate or deactivate a drive by the company and delete drive
+@app.route('/company_dashboard/toggle_status/<int:drive_id>', methods=['POST'])
+@login_required
+def toggle_drive_status(drive_id):
+    # Company may only close active drives; admin activation is handled separately.
+    if current_user.role != 'company':
+        abort(403)
+    drive = Placement_Drives.query.get_or_404(drive_id)
+    if drive.company_id != current_user.id:
+        abort(403)
+    if drive.drive_status == 'active':
+        drive.drive_status = 'closed'
+        db.session.commit()
+        flash("Drive closed successfully", "success")
+    else:
+        flash("Only active drives can be closed by the company", "warning")
+    return redirect(url_for('company_dashboard'))
 
-
-
+@app.route('/admin_dashboard/drives/close/<int:d_id>')
+@login_required
+def close_drive(d_id):
+    if current_user.role != 'admin':
+        return "Unauthorized", 403
+    drive = Placement_Drives.query.get(d_id)
+    if drive and drive.drive_status == 'active':
+        drive.drive_status = 'closed'
+        db.session.commit()
+        flash("Drive closed successfully", "success")
+    else:
+        flash("Only active drives can be closed", "warning")
+    return redirect(url_for('admin_drives'))
 
 #------------------------------Navbar------------------------------
 #logout button

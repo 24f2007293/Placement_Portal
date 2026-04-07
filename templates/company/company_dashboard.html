@@ -18,11 +18,88 @@
                             </span>
                     </div>
                 </nav>
-    <h1>Company Dashboard</h1>
-    <a href="{{url_for('create_drive',company_id=current_user.id) }}" class="btn btn-outline-primary">
-        Create Drive
-    </a>
+    <div class="container py-4">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <div>
+                <h1 class="mb-0">Company Dashboard</h1>
+                <p class="text-muted mb-0">View your upcoming and closed drives below.</p>
+            </div>
+            <a href="{{url_for('create_drive',company_id=current_user.id) }}" class="btn btn-success">
+                Create Drive
+            </a>
+        </div>
+
+        <section class="mb-5">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h2 class="mb-0">Upcoming Drives</h2>
+            </div>
+            {% if upcoming_drives %}
+                <div class="table-responsive">
+                    <table class="table table-bordered table-striped align-middle">
+                        <thead class="table-light">
+                            <tr>
+                                <th style="width: 80px;">Sr No.</th>
+                                <th>Drive Name</th>
+                                <th style="width: 240px;">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for drive in upcoming_drives %}
+                                <tr>
+                                    <td>{{ loop.index }}</td>
+                                    <td>{{ drive.drive_name }}</td>
+                                    <td>
+                                        <a href="{{ url_for('company_drive_details', drive_id=drive.id) }}" class="btn btn-sm btn-info me-2">View Details</a>
+                                        {% if drive.drive_status == 'active' %}
+                                            <form action="{{ url_for('toggle_drive_status', drive_id=drive.id) }}" method="post" class="d-inline">
+                                                <button type="submit" class="btn btn-sm btn-primary me-2">Mark as Complete</button>
+                                            </form>
+                                        {% else %}
+                                            <span class="badge bg-secondary">{{ drive.drive_status|capitalize }} - Awaiting approval</span>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            {% else %}
+                <p class="text-muted">No upcoming drives found.</p>
+            {% endif %}
+        </section>
+
+        <section>
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h2 class="mb-0">Closed Drives</h2>
+            </div>
+            {% if closed_drives %}
+                <div class="table-responsive">
+                    <table class="table table-bordered table-striped align-middle">
+                        <thead class="table-light">
+                            <tr>
+                                <th style="width: 80px;">Sr No.</th>
+                                <th>Drive Name</th>
+                                <th style="width: 240px;">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for drive in closed_drives %}
+                                <tr>
+                                    <td>{{ loop.index }}</td>
+                                    <td>{{ drive.drive_name }}</td>
+                                    <td>
+                                        <a href="{{ url_for('company_drive_details', drive_id=drive.id) }}" class="btn btn-sm btn-info me-2">View Details</a>
+                                        <span class="badge bg-secondary">Closed</span>
+                                    </td>
+                                </tr>
+                                
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            {% else %}
+                <p class="text-muted">No closed drives yet.</p>
+            {% endif %}
+        </section>
+    </div>
     {%endblock%}
-    
-</body>
-</html>

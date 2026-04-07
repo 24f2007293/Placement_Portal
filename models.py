@@ -37,6 +37,7 @@ class Student_Profiles(db.Model):
 class Company_Profiles(db.Model):
     __tablename__='company_profiles'
     user_id=db.Column(db.Integer,db.ForeignKey('users.id'),primary_key=True,nullable=False,unique=True)
+    description=db.Column(db.Text,nullable=False)
     company_name=db.Column(db.String(150),nullable=False,unique=True,index=True)
     hr_number=db.Column(db.String(150),nullable=False)
     website_url = db.Column(db.String(300), nullable=True)
@@ -58,8 +59,6 @@ class Placement_Drives(db.Model):
     id=db.Column(db.Integer,primary_key=True,unique=True)
     #managed by backend
     company_id=db.Column(db.Integer,db.ForeignKey('company_profiles.user_id'),nullable=False,index=True)
-    #these functions will be used to keep track of time of creation and modification of drive.
-    is_deleted = db.Column(db.Boolean, default=False)
     drive_status=db.Column(db.Enum('pending','active','closed','rejected',name="drive_status"),nullable=False,default='pending',index=True)
     applications = db.relationship('Applications_Table',backref='drive',lazy="dynamic")
     
@@ -70,7 +69,7 @@ class Applications_Table(db.Model):
     student_id=db.Column(db.Integer,db.ForeignKey('student_profiles.user_id'))
     drive_id=db.Column(db.Integer,db.ForeignKey('placement_drives.id'))
     applied_at=db.Column(db.DateTime,default=datetime.datetime.utcnow)
-    status=db.Column(db.String(150))
+    status=db.Column(db.Enum('applied','shortlisted','selected','rejected',name='status'),nullable=False,default="applied")
     #Constraint to ensure a student can apply only once to a particular drive
     __table_args__ = (db.UniqueConstraint('student_id', 'drive_id'),)
 

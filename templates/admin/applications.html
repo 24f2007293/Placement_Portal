@@ -11,7 +11,7 @@
                             <nav class="navbar navbar-dark bg-dark px-3">
                     <div class="d-flex align-items-center justify-content-between w-100 text-white">
                             <span style="text-align: right;">
-                                <a href="{{url_for('admin_dashboard')}}" style="text-decoration: none;">Welcome Admin !!</a>
+                                <a href="{{url_for('admin_dashboard')}}" style="text-decoration: none; color: white;">Welcome Admin !!</a>
                             </span>
                             <span style="text-align: left;">
                                 <a href="{{url_for('admin_comp')}}" class="btn btn-outline-light btn-sm">Companies</a>
@@ -23,7 +23,20 @@
                     </div>
                 </nav>
     Student Applications
-
+    <div>
+        <table class="table table-bordered w-100">
+        <h4>Student Applications</h4>
+        <tr><th>Student Name</th><th>Company Name</th><th>Job Title</th><th>Status</th></tr>
+        {%for app in applications%}
+        <tr>
+            <td>{{app.student.first_name}} {{app.student.last_name}}</td>
+            <td>{{app.drive.company.company_name}}</td>
+            <td>{{app.drive.job_title}}</td>
+            <td>{{app.status}}</td>
+            
+        </tr>
+        {%endfor%}
+        </table>
 
     {%endblock%}
 </body>

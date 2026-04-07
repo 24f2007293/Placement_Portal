@@ -16,7 +16,7 @@
                             <span class="d-flex" style="text-align: left;">
                                 <form method="GET" action="{{url_for('admin_comp')}}" >
                                     <div class="input-group align-items-center" >
-                                        <input class="py-0 " style="width: 150px; border-color: black;" type="text" name="q" placeholder="Search Company" >
+                                        <input class="py-0 " style="width: 150px; border-color: black;" type="text" name="q" placeholder="Search drive or company" >
                                         <div class="input-group-text p-0 me-4 bg-dark" style="border: none;">
                                             <button type="submit" class="input-group-text p-0 me-1 bg-dark" style="border: none;">
                                                 🔍
@@ -24,13 +24,91 @@
                                         </div>
                                     </div>
                                 </form>
-                                <a href="{{url_for('edit_sprofile')}}" class="btn btn-outline-light btn-sm">Edit Profile</a>
+                                <a href="{{url_for('edit_sprofile')}}"  class="btn btn-outline-light btn-sm">Edit Profile</a>
                                 <a href="{{url_for('logout')}}" class="btn btn-danger btn-sm">Logout</a>
                             </span>
                     </div>
                 </nav>
+
+
+
+
+
     <h1>Student Dashboard</h1>
-    <p>Welcome, {{ current_user.student_profiles.first_name }}!</p>
+    <br>
+    <table class="table table-bordered w-100">
+        <h4>Companies</h4>
+    <tr><th>Company Name</th><th>Action</th></tr>
+    {%for com in companies%}
+    <tr><td>{{com.company_name}}</td>
+        <td>
+            <a href="{{url_for('view_company',company_id=com.user_id)}}">view details</a>
+        </td>
+    </tr>
+    {%endfor%}
+    </table>
+
+<br>
+
+    <h4>Applied Drives</h4>
+
+<table class="table">
+    <tr>
+        <th>Sr No.</th>
+        <th>Drive Name</th>
+        <th>Company</th>
+        <th>Date</th>
+        <th>Status</th>
+        <th>Action</th>
+    </tr>
+
+    {% for app in applications %}
+    <tr>
+        <td>{{ loop.index }}</td>
+        <td>{{ app.drive.drive_name }}</td>
+        <td>{{ app.drive.company.company_name }}</td>
+        <td>{{ app.applied_at.strftime('%d/%m/%Y') }}</td>
+        <td>{{ app.status }}</td>
+        <td>
+            <button 
+                data-bs-toggle="modal"
+                data-bs-target="#modal{{ app.drive.id }}"
+            >
+                view details
+            </button>
+        </td>
+    </tr>
+    <div class="modal fade" id="modal{{ app.drive.id }}" tabindex="-1">
+  <div class="modal-dialog">
+    <div class="modal-content p-3">
+
+        <h4>{{ app.drive.drive_name }}</h4>
+
+        <p><strong>Job Title:</strong> {{ app.drive.job_title }}</p>
+        <p><strong>Description:</strong> {{ app.drive.description }}</p>
+        <p><strong>Salary:</strong> {{ app.drive.ctc }}</p>
+        <p><strong>Location:</strong> {{ app.drive.location }}</p>
+        
+
+        <button class="btn btn-secondary" data-bs-dismiss="modal">
+            Close
+        </button>
+
+    </div>
+  </div>
+</div>
+    {% endfor %}
+</table>
+    
+    
+    <p></p>
+    
+
+
+
     {%endblock%}
+
+
+
 </body>
 </html>
