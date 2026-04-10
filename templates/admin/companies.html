@@ -42,9 +42,9 @@
         <tr>
             <td>{{com.company_name}}</td>
             {%if com.user.is_approved==True%}
-            <td><a href="{{url_for('blacklist_user',user_id=com.user_id)}}" method="POST">Blacklist</a></td>
+            <td><a href="{{url_for('blacklist_user',user_id=com.user_id)}}" class='btn btn-dark' method="POST">Blacklist</a></td>
             {%else%}
-            <td><a href="{{url_for('whitelist_user',user_id=com.user_id)}}" method="POST">Whitelist</a></td>
+            <td><a href="{{url_for('whitelist_user',user_id=com.user_id)}}" class='btn btn-info' method="POST">Whitelist</a></td>
             {%endif%}
         </tr>
         {%endfor%}

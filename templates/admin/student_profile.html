@@ -1,0 +1,100 @@
+{% extends "auth/Base_form.html" %}
+{% block title %}Student Profile - Admin{% endblock %}
+{% block content %}
+<nav class="navbar navbar-dark bg-dark px-3">
+    <div class="d-flex align-items-center justify-content-between w-100 text-white">
+        <span>Admin Panel</span>
+        <span>
+            <a href="{{url_for('admin_students')}}" class="btn btn-outline-light btn-sm me-2">Back to Students</a>
+            <a href="{{url_for('logout')}}" class="btn btn-danger btn-sm">Logout</a>
+        </span>
+    </div>
+</nav>
+
+<div class="container mt-4">
+    <h1>Student Profile</h1>
+    <hr>
+    
+    <div class="row">
+        <div class="col-md-8">
+            <div class="card p-4 mb-4">
+                <h5 class="card-title">Personal Information</h5>
+                <p><strong>First Name:</strong> {{ student.first_name }}</p>
+                <p><strong>Last Name:</strong> {{ student.last_name }}</p>
+                <p><strong>Department:</strong> {{ student.department_name }}</p>
+                <p><strong>Graduation Year:</strong> {{ student.graduation_year }}</p>
+                <p><strong>CGPA:</strong> {{ student.cgpa }}</p>
+                {% if student.resume_path %}
+                    <p><strong>Resume:</strong> <a href="/{{ student.resume_path }}" target="_blank" class="btn btn-sm btn-outline-primary">Download Resume</a></p>
+                {% else %}
+                    <p><strong>Resume:</strong> <span class="badge bg-warning">Not Uploaded</span></p>
+                {% endif %}
+            </div>
+
+            <div class="card p-4">
+                <h5 class="card-title">Job Applications</h5>
+                {% if applications %}
+                    <div class="table-responsive">
+                        <table class="table table-bordered table-striped">
+                            <thead>
+                                <tr>
+                                    <th>Drive Name</th>
+                                    <th>Company</th>
+                                    <th>Job Title</th>
+                                    <th>Applied Date</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for app in applications %}
+                                <tr>
+                                    <td>{{ app.drive.drive_name }}</td>
+                                    <td>{{ app.drive.company.company_name }}</td>
+                                    <td>{{ app.drive.job_title }}</td>
+                                    <td>{{ app.applied_at.strftime('%d/%m/%Y %H:%M') }}</td>
+                                    <td>
+                                        {% if app.status == 'applied' %}
+                                            <span class="badge bg-primary">{{ app.status.title() }}</span>
+                                        {% elif app.status == 'shortlisted' %}
+                                            <span class="badge bg-warning">{{ app.status.title() }}</span>
+                                        {% elif app.status == 'selected' %}
+                                            <span class="badge bg-success">{{ app.status.title() }}</span>
+                                        {% elif app.status == 'rejected' %}
+                                            <span class="badge bg-danger">{{ app.status.title() }}</span>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                {% else %}
+                    <p class="text-muted">No applications found.</p>
+                {% endif %}
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card p-4">
+                <h5 class="card-title">Quick Stats</h5>
+                <div class="mb-3">
+                    <p class="mb-0"><strong>Total Applications:</strong></p>
+                    <h4>{{ applications|length }}</h4>
+                </div>
+                <div class="mb-3">
+                    <p class="mb-0"><strong>Selected:</strong></p>
+                    <h4 class="text-success">{{ applications|selectattr('status', 'equalto', 'selected')|list|length }}</h4>
+                </div>
+                <div class="mb-3">
+                    <p class="mb-0"><strong>Shortlisted:</strong></p>
+                    <h4 class="text-warning">{{ applications|selectattr('status', 'equalto', 'shortlisted')|list|length }}</h4>
+                </div>
+                <div class="mb-3">
+                    <p class="mb-0"><strong>Rejected:</strong></p>
+                    <h4 class="text-danger">{{ applications|selectattr('status', 'equalto', 'rejected')|list|length }}</h4>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

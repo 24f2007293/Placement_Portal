@@ -36,15 +36,18 @@
     <div>
         <table class="table table-bordered w-100">
         <h4>Registered Students</h4>
-        <tr><th>Student Name</th><th>Action</th></tr>
+        <tr><th>Student Name</th><th>Actions</th></tr>
         {%for st in Students%}
         <tr>
             <td>{{st.first_name}} {{st.last_name}}</td>
-            {%if st.user.is_approved==True%}
-            <td><a href="{{url_for('blacklist_user',user_id=st.user_id)}}">Blacklist</a></td>
-            {%else%}
-            <td><a href="{{url_for('whitelist_user',user_id=st.user_id)}}">Whitelist</a> </td>
-            {%endif%}
+            <td>
+                <a href="{{url_for('view_student_admin', student_id=st.user_id)}}" class="btn btn-sm btn-info">View Profile</a>
+                {%if st.user.is_approved==True%}
+                <a href="{{url_for('blacklist_user',user_id=st.user_id)}}" class="btn btn-sm btn-warning">Blacklist</a>
+                {%else%}
+                <a href="{{url_for('whitelist_user',user_id=st.user_id)}}" class="btn btn-sm btn-success">Whitelist</a>
+                {%endif%}
+            </td>
         </tr>
         {%endfor%}
         </table>

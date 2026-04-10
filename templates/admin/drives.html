@@ -22,40 +22,55 @@
         </span>
     </div>
 </nav>
-<div>
-    <table class="table table-bordered w-100">
-        <h4 style="color: green;">🟢 Currently Ongoing Drives</h4>
-        <tr><th>Drive Name</th><th>Company Name</th><th>Job Title</th><th>Type</th><th>Applicants</th><th>Actions</th></tr>
-                {%for a in active%}
+<div class="container py-4">
+    <div class="d-flex justify-content-between align-items-centre mb-3">
+        <h3 style="color: green;">🟢 Currently Ongoing Drives</h3>
+    </div>
+    <div class="table-responsive">
+    <table class="table table-bordered table-striped align-middle">
+        <thead class="table-light">
         <tr>
-            <td>{{a.drive_name}}</td>
-            <td>{{a.company.company_name}}</td>
-            <td>{{a.job_title}}</td>
-            <td>{{a.job_type}}</td>
-            <td>Setup later</td>
-            <td>
-                <a href="{{ url_for('close_drive', d_id=a.id) }}" class="btn btn-danger btn-sm">Close Drive</a>
-            </td>
-
+            <th style="width: 20px;">Sr.No</th><th>Drive Name</th><th>Company Name</th><th>Job Title</th><th>Job Type</th><th>Applicants</th><th>Actions</th>
         </tr>
-        {%endfor%}
+        </thead>
+        <tbody>
+            {%for a in active%}
+            <tr>
+                <td>{{loop.index}}</td>
+                <td>{{a.drive_name}}</td>
+                <td>{{a.company.company_name}}</td>
+                <td>{{a.job_title}}</td>
+                <td>{{a.job_type}}</td>
+                <td>
+                    <button type="button" class="btn btn-outline-success btn-sm" data-bs-toggle="modal" data-bs-target="#modal-{{a.id}}">View Applicants</button>
+                </td>
+                <td>
+                    <a href="{{ url_for('close_drive', d_id=a.id) }}" class="btn btn-danger btn-sm">Close Drive</a>
+                </td>
+
+            </tr>
+            {%endfor%}
+        </tbody>
         
     </table>
-</div>
+    </div>
 <br>
 <div>
     <table class="table table-bordered w-100">
         <h4 style="color: grey;">⚫ Closed Drives</h4>
-        <tr><th>Drive Name</th><th>Company Name</th><th>Job Title</th><th>Applicants</th><th>Actions</th></tr>
+        <tr><th style="width: 20px;">Sr.No</th><th>Drive Name</th><th>Company Name</th><th>Job Title</th><th>Job Type</th><th>Applicants</th><th>Actions</th></tr>
                 {%for c in closed%}
         <tr>
+            <td>{{loop.index}}</td>
             <td>{{c.drive_name}}</td>
             <td>{{c.company.company_name}}</td>
             <td>{{c.job_title}}</td>
             <td>{{c.job_type}}</td>
-            <td>Setup later</td>
             <td>
-                
+                <button type="button" class="btn btn-outline-secondary btn-sm" data-bs-toggle="modal" data-bs-target="#modal-{{c.id}}">View Applicants</button>
+            </td>
+            <td>
+                No actions available
             </td>
 
         </tr>
@@ -74,7 +89,9 @@
             <td>{{pen.company.company_name}}</td>
             <td>{{pen.job_title}}</td>
             <td>{{pen.job_type}}</td>
-            <td>Setup later</td>
+            <td>
+                <button type="button" class="btn btn-outline-warning btn-sm" data-bs-toggle="modal" data-bs-target="#modal-{{pen.id}}">View Applicants</button>
+            </td>
             <td>
                 <a href="{{url_for('approve_drive',d_id=pen.id)}}" method="POST" class="btn btn-success">Activate</a>
                 <a href="{{url_for('reject_drive',d_id=pen.id)}}" method="POST" class="btn btn-danger">Reject</a>
@@ -89,14 +106,16 @@
 <div>
     <table class="table table-bordered w-100">
         <h4 style="color: red;">🔴 Rejected Drives</h4>
-        <tr><th>Drive Name</th><th>Company Name</th><th>Job Title</th><th>Applicants</th><th>Actions</th></tr>
+        <tr><th>Drive Name</th><th>Company Name</th><th>Job Title</th><th>Job Type</th><th>Applicants</th><th>Actions</th></tr>
             {%for r in rejected%}
         <tr>
             <td>{{r.drive_name}}</td>
             <td>{{r.company.company_name}}</td>
             <td>{{r.job_title}}</td>
             <td>{{r.job_type}}</td>
-            <td>Setup later</td>
+            <td>
+                <button type="button" class="btn btn-outline-danger btn-sm" data-bs-toggle="modal" data-bs-target="#modal-{{r.id}}">View Applicants</button>
+            </td>
             <td>
                 
             </td>
@@ -107,6 +126,127 @@
     </table>
 </div>
 
+
+
+<!-- Modals for Active Drives -->
+{% for a in active %}
+<div class="modal fade" id="modal-{{a.id}}" tabindex="-1" aria-labelledby="modalLabel-{{a.id}}" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="modalLabel-{{a.id}}">Applicants for {{a.drive_name}}</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <h6>Applicants:</h6>
+                {% if a.applications %}
+                <ul class="list-group">
+                    {% for app in a.applications %}
+                    <li class="list-group-item">{{app.student.first_name}} {{app.student.last_name}} - {{app.student.email}}</li>
+                    {% endfor %}
+                </ul>
+                {% else %}
+                <p>No applicants yet.</p>
+                {% endif %}
+                <p>Please Go onto the applications tab for more info</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endfor %}
+
+<!-- Modals for Closed Drives -->
+{% for c in closed %}
+<div class="modal fade" id="modal-{{c.id}}" tabindex="-1" aria-labelledby="modalLabel-{{c.id}}" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="modalLabel-{{c.id}}">Applicants for {{c.drive_name}}</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <h6>Applicants:</h6>
+                {% if c.applications %}
+                <ul class="list-group">
+                    {% for app in c.applications %}
+                    <li class="list-group-item">{{app.student.first_name}} {{app.student.last_name}} - {{app.student.email}}</li>
+                    {% endfor %}
+                </ul>
+                {% else %}
+                <p>No applicants yet.</p>
+                {% endif %}
+                <p>Please Go onto the applications tab for more info</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endfor %}
+
+<!-- Modals for Pending Drives -->
+{% for pen in pending %}
+<div class="modal fade" id="modal-{{pen.id}}" tabindex="-1" aria-labelledby="modalLabel-{{pen.id}}" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="modalLabel-{{pen.id}}">Applicants for {{pen.drive_name}}</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <h6>Applicants:</h6>
+                {% if pen.applications %}
+                <ul class="list-group">
+                    {% for app in pen.applications %}
+                    <li class="list-group-item">{{app.student.first_name}} {{app.student.last_name}} - {{app.student.email}}</li>
+                    {% endfor %}
+                </ul>
+                {% else %}
+                <p>No applicants yet.</p>
+                {% endif %}
+                <p>Please Go onto the applications tab for more info</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endfor %}
+
+<!-- Modals for Rejected Drives -->
+{% for r in rejected %}
+<div class="modal fade" id="modal-{{r.id}}" tabindex="-1" aria-labelledby="modalLabel-{{r.id}}" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="modalLabel-{{r.id}}">Applicants for {{r.drive_name}}</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <h6>Applicants:</h6>
+                {% if r.applications %}
+                <ul class="list-group">
+                    {% for app in r.applications %}
+                    <li class="list-group-item">{{app.student.first_name}} {{app.student.last_name}} - {{app.student.email}}</li>
+                    {% endfor %}
+                </ul>
+                {% else %}
+                <p>No applicants yet.</p>
+                {% endif %}
+                <p>Please Go onto the applications tab for more info</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endfor %}
 
 
     {%endblock%}

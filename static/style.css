@@ -1,18 +1,1 @@
-#main, #canvas{
-    border: 2px solid black;
-}
-#canvas{
-    width: 800;
-    height:1000px;
-    margin:auto;
-}
-*{margin:0px}
-#form-body{
-    border: 2px solid red;
-    width: 800px;
-    height: 800px;
-    margin:auto;
-    border-radius:5px;
-    padding: 10px;
-    margin-top: 70px;
-}
+    

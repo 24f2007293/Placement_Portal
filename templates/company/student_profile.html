@@ -1,0 +1,43 @@
+{% extends "auth/Base_form.html" %}
+{% block title %}Student Profile - Company{% endblock %}
+{% block content %}
+<nav class="navbar navbar-dark bg-dark px-3">
+    <div class="d-flex align-items-center justify-content-between w-100 text-white">
+        <span>{{ current_user.company_profiles.company_name }}</span>
+        <span>
+            <a href="{{url_for('company_dashboard')}}" class="btn btn-outline-light btn-sm me-2">Back to Dashboard</a>
+            <a href="{{url_for('logout')}}" class="btn btn-danger btn-sm">Logout</a>
+        </span>
+    </div>
+</nav>
+
+<div class="container mt-4">
+    <h1>Student Profile</h1>
+    <hr>
+    
+    <div class="row">
+        <div class="col-md-8">
+            <div class="card p-4">
+                <h5 class="card-title">Personal Information</h5>
+                <p><strong>Full Name:</strong> {{ student.first_name }} {{ student.last_name }}</p>
+                <p><strong>Department:</strong> {{ student.department_name }}</p>
+                <p><strong>Graduation Year:</strong> {{ student.graduation_year }}</p>
+                <p><strong>CGPA:</strong> {{ student.cgpa }}</p>
+                {% if student.resume_path %}
+                    <p><strong>Resume:</strong> <a href="/{{ student.resume_path }}" target="_blank" class="btn btn-sm btn-outline-primary">Download Resume</a></p>
+                {% else %}
+                    <p><strong>Resume:</strong> <span class="badge bg-warning">Not Uploaded</span></p>
+                {% endif %}
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card p-4">
+                <h5 class="card-title">Contact Information</h5>
+                <p class="mb-0"><strong>User ID:</strong> {{ student.user_id }}</p>
+                <small class="text-muted">Verify credentials as needed</small>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

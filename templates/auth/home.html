@@ -1,18 +1,19 @@
 {% extends "auth/Base_form.html" %}
 {% block title %}Home Page{% endblock %}
 {% block content %}
-<nav class="navbar navbar-dark bg-dark px-3">
-    <span class="navbar-brand">Placement Portal</span>
-</nav>
-
-<h2>Login</h2>
-<a href="{{url_for('login')}}" class="btn btn-outline-primary"> Click here to login</a>
-<br>
-<br>
-<h2>Register as Student</h2>
-<a href="{{url_for('student_reg')}}" class="btn btn-outline-primary">Click here to land a job</a>
-<br>
-<br>
-<h2>Register as Company</h2>
-<a href="{{url_for('company_reg')}}" class="btn btn-outline-primary"   >Click here to grow your employee base</a>
+    <nav class="navbar navbar-dark bg-dark px-3 align-content-center">
+        <span class="navbar-brand">Placement Portal</span>
+    </nav>
+<div class="container-fluid py-5 text-center">
+    <h2>Login</h2>
+    <a href="{{url_for('login')}}" class="btn btn-outline-primary"> Click here to login</a>
+    <br>
+    <br>
+    <h2>Register as Student</h2>
+    <a href="{{url_for('student_reg')}}" class="btn btn-outline-primary">Click here to land a job</a>
+    <br>
+    <br>
+    <h2>Register as Company</h2>
+    <a href="{{url_for('company_reg')}}" class="btn btn-outline-primary"   >Click here to grow your employee base</a>
+</div>
 {% endblock %}

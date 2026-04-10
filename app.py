@@ -129,6 +129,7 @@ def student_reg():
     return render_template('auth/student_reg.html')
 
 #--------------------------------------------Admin-------------------------------------------------------------
+
 #Routes to take you to the dashboards
 @app.route('/admin_dashboard')
 @login_required
@@ -189,6 +190,8 @@ def admin_drives():
     rejected=Placement_Drives.query.filter_by(drive_status="rejected")
 
     return render_template("admin/drives.html",pending=pending,active=active,closed=closed,rejected=rejected)
+
+
 #functions for drive management
 @app.route("/admin_dashboard/drives/approve/<int:d_id>")
 @login_required
@@ -241,6 +244,7 @@ def approve_company(company_id):
     if company:
         company.approval_status = "approved"
         company.user.is_approved = True   # if you also store it in users table
+        flash("Company Approved Successfully", "success")
         db.session.commit()
 
     return redirect(url_for("admin_comp"))
@@ -273,8 +277,18 @@ def whitelist_user(user_id):
     user=User.query.get(user_id)
     user.is_approved=True
     db.session.commit()
-    flash("User Whitelisted!!","information")
+    flash("User Whitelisted!!","info")
     return redirect(request.referrer)
+
+#View drive applicants for admin
+@app.route('/admin_dashboard/drive/<int:drive_id>/applicants')
+@login_required
+def view_drive_applicants_admin(drive_id):
+    if current_user.role!='admin':
+        abort(403)
+    drive = Placement_Drives.query.get_or_404(drive_id)
+    applications=Applications_Table.query.filter_by(drive_id=drive_id).all()
+    return render_template('admin/drive_applicants.html', drive=drive, applications=applications)
 
 
 
@@ -303,7 +317,7 @@ def student_dashboard():
 
     return render_template('student/student_dashboard.html',drives=drives,applications=applications,companies=companies)
 
-#View Company page routing :
+#Check whether student have completed their profile and return true or false:
 def is_profile_complete(student):
     return bool(
         student and
@@ -369,6 +383,17 @@ def edit_sprofile():
     return render_template('student/edit.html', student=student)
 
 
+#route for student application history
+@app.route('/student_dashboard/history')
+@login_required
+def application_history():
+    if current_user.role != 'student':
+        abort(403)
+    student_profile = current_user.student_profiles
+    applications = Applications_Table.query.filter_by(student_id=student_profile.user_id).order_by(Applications_Table.applied_at.desc()).all()
+    return render_template('student/history.html', applications=applications)
+
+
 #route for the student to apply
 
 @app.route('/apply/<int:drive_id>', methods=['POST'])
@@ -402,6 +427,53 @@ def apply(drive_id):
     return redirect(url_for('student_dashboard'))
 
 
+#route for viewing student profile and applications (for admin)
+@app.route('/admin/student/<int:student_id>')
+@login_required
+def view_student_admin(student_id):
+    if current_user.role != 'admin':
+        abort(403)
+    student = Student_Profiles.query.get_or_404(student_id)
+    applications = Applications_Table.query.filter_by(student_id=student_id).all()
+    return render_template('admin/student_profile.html', student=student, applications=applications)
+
+
+#route for viewing student applicants for a specific drive (for company)
+@app.route('/company_dashboard/drive/<int:drive_id>/applicants')
+@login_required
+def view_drive_applicants(drive_id):
+    if current_user.role != 'company' or current_user.role!='admin':
+        abort(403)
+    drive = Placement_Drives.query.get_or_404(drive_id)
+    if drive.company_id != current_user.id:
+        abort(403)
+    applications = Applications_Table.query.filter_by(drive_id=drive_id).all()
+    return render_template('company/applicants.html', drive=drive, applications=applications)
+
+
+#route for company viewing a specific student's profile
+@app.route('/company/student/<int:student_id>')
+@login_required
+def view_student_company(student_id):
+    if current_user.role != 'company':
+        abort(403)
+    student = Student_Profiles.query.get_or_404(student_id)
+    # Verify the company has received an application from this student
+    applications = Applications_Table.query.filter_by(student_id=student_id).all()
+    student_applied = any(app.drive.company_id == current_user.id for app in applications)
+    if not student_applied:
+        abort(403)
+    return render_template('company/student_profile.html', student=student)
+
+
+#route for student viewing their own profile
+@app.route('/student_dashboard/view_profile')
+@login_required
+def view_student_profile():
+    if current_user.role != 'student':
+        abort(403)
+    student = current_user.student_profiles
+    return render_template('student/view_profile.html', student=student)
 
 
 
