@@ -1,19 +1,100 @@
 {% extends "auth/Base_form.html" %}
 {% block title %}Home Page{% endblock %}
+
 {% block content %}
-    <nav class="navbar navbar-dark bg-dark px-3 align-content-center">
-        <span class="navbar-brand">Placement Portal</span>
-    </nav>
-<div class="container-fluid py-5 text-center">
-    <h2>Login</h2>
-    <a href="{{url_for('login')}}" class="btn btn-outline-primary"> Click here to login</a>
-    <br>
-    <br>
-    <h2>Register as Student</h2>
-    <a href="{{url_for('student_reg')}}" class="btn btn-outline-primary">Click here to land a job</a>
-    <br>
-    <br>
-    <h2>Register as Company</h2>
-    <a href="{{url_for('company_reg')}}" class="btn btn-outline-primary"   >Click here to grow your employee base</a>
+
+<style>
+    body {
+        background: linear-gradient(135deg, #0f2027, #203a43, #2c5364);
+        color: white;
+        font-family: 'Segoe UI', sans-serif;
+    }
+
+    .navbar {
+        box-shadow: 0 2px 10px rgba(0,0,0,0.4);
+    }
+
+    .hero {
+        margin-top: 60px;
+    }
+
+    .hero h1 {
+        font-size: 42px;
+        font-weight: 700;
+    }
+
+    .hero p {
+        color: #cfd8dc;
+        font-size: 18px;
+        margin-bottom: 40px;
+    }
+
+    .card-box {
+        background: rgba(255, 255, 255, 0.08);
+        border-radius: 15px;
+        padding: 30px;
+        transition: 0.3s;
+        backdrop-filter: blur(10px);
+    }
+
+    .card-box:hover {
+        transform: translateY(-5px);
+        background: rgba(255, 255, 255, 0.12);
+    }
+
+    .btn-custom {
+        margin-top: 15px;
+        width: 100%;
+        border-radius: 25px;
+        font-weight: 500;
+    }
+
+    .footer {
+        margin-top: 80px;
+        font-size: 14px;
+        color: #b0bec5;
+    }
+</style>
+
+<nav class="navbar navbar-dark bg-dark px-4">
+    <span class="navbar-brand fs-4">Placement Portal</span>
+</nav>
+
+<div class="container hero text-center">
+    <h1>Campus Placement System</h1>
+    <p>Connecting students with opportunities and companies with talent</p>
+
+    <div class="row justify-content-center g-4">
+
+        <div class="col-md-3">
+            <div class="card-box">
+                <h4>Login</h4>
+                <p>Access your dashboard</p>
+                <a href="{{url_for('login')}}" class="btn btn-outline-light btn-custom">Login</a>
+            </div>
+        </div>
+
+        <div class="col-md-3">
+            <div class="card-box">
+                <h4>Student</h4>
+                <p>Register and apply to drives</p>
+                <a href="{{url_for('student_reg')}}" class="btn btn-outline-info btn-custom">Register</a>
+            </div>
+        </div>
+
+        <div class="col-md-3">
+            <div class="card-box">
+                <h4>Company</h4>
+                <p>Hire skilled candidates</p>
+                <a href="{{url_for('company_reg')}}" class="btn btn-outline-warning btn-custom">Register</a>
+            </div>
+        </div>
+
+    </div>
+
+    <div class="footer text-center">
+        <p>© 2026 Placement Portal | Campus Placement System</p>
+    </div>
 </div>
+
 {% endblock %}

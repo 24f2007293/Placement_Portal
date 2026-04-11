@@ -12,6 +12,7 @@ class User(db.Model,UserMixin):
     role=db.Column(db.String(150),nullable=False)
     is_active=db.Column(db.Boolean,default=True)
     is_approved=db.Column(db.Boolean,default=True,nullable=True)
+    is_blacklisted=db.Column(db.Boolean,default=False,nullable=True)
     created_at=db.Column(db.DateTime,default=datetime.datetime.utcnow)
     #Making connection with student profiles and company profiles
     student_profiles=db.relationship('Student_Profiles',backref='user',uselist=False)

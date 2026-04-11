@@ -22,7 +22,6 @@
                             </span>
                     </div>
                 </nav>
-    Student Applications
     <div>
         <table class="table table-bordered w-100">
         <h4>Student Applications</h4>
@@ -32,8 +31,15 @@
             <td>{{app.student.first_name}} {{app.student.last_name}}</td>
             <td>{{app.drive.company.company_name}}</td>
             <td>{{app.drive.job_title}}</td>
-            <td>{{app.status}}</td>
-            
+            {%if app.status=='applied'%}
+            <td><p class="badge bg-primary">Applied</p></td>
+            {%elif app.status=='shortlisted'%}
+            <td><p class="badge bg-info">Shortlisted</p></td>
+            {%elif app.status=='rejected'%}
+            <td><p class="badge bg-danger">Rejected</p></td>
+            {%elif app.status=='selected'%}
+            <td><p class="badge bg-success">Selected</p></td>
+            {%endif%}
         </tr>
         {%endfor%}
         </table>

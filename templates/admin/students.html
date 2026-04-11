@@ -41,11 +41,11 @@
         <tr>
             <td>{{st.first_name}} {{st.last_name}}</td>
             <td>
-                <a href="{{url_for('view_student_admin', student_id=st.user_id)}}" class="btn btn-sm btn-info">View Profile</a>
-                {%if st.user.is_approved==True%}
-                <a href="{{url_for('blacklist_user',user_id=st.user_id)}}" class="btn btn-sm btn-warning">Blacklist</a>
+                <a href="{{url_for('view_student_admin', student_id=st.user_id)}}" class="btn btn-sm btn-success">View Profile</a>
+                {%if st.user.is_blacklisted==False%}
+                <a href="{{url_for('blacklist_user',user_id=st.user_id)}}" class="btn btn-sm btn-dark">Blacklist</a>
                 {%else%}
-                <a href="{{url_for('whitelist_user',user_id=st.user_id)}}" class="btn btn-sm btn-success">Whitelist</a>
+                <a href="{{url_for('whitelist_user',user_id=st.user_id)}}" class="btn btn-sm btn-info">Whitelist</a>
                 {%endif%}
             </td>
         </tr>

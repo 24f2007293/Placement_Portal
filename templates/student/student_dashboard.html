@@ -44,7 +44,7 @@
     {%for com in companies%}
     <tr><td>{{com.company_name}}</td>
         <td>
-            <a href="{{url_for('view_company',company_id=com.user_id)}}">view details</a>
+            <a href="{{url_for('view_company',company_id=com.user_id)}} " class="btn btn-outline-primary">view details</a>
         </td>
     </tr>
     {%endfor%}

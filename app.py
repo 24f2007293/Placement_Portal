@@ -45,31 +45,36 @@ def login():
         
 
         user=User.query.filter_by(email=email).first()
+        if not user or not user.check_password(password):
+            flash("Invalid email or password", "danger")
+            return redirect(url_for("login"))
 
         if user and user.check_password(password):
-            if user.role=="company" and not user.is_approved:
-                flash("Company verification is under process !! Please Try Again later.","warning")
-                return redirect(url_for("login"))
-            login_user(user)
+            if user.role=="company":
+                if user.is_approved==False:
+                    flash("Company verification is under process !! Please Try Again later.","warning")
+                    return redirect(url_for("login"))
+                if user.is_blacklisted:
+                    flash("You are blacklisted for malicious activity","danger")
+                    return redirect(url_for("login"))
+                else:
+                    login_user(user)
+                    flash("Logged in!!","success")
+                    return redirect(url_for("company_dashboard"))
             if user.role=="admin":
                 login_user(user)
                 flash("Logged in!!","success")
                 return redirect(url_for("admin_dashboard"))
             
-            elif user.role == "company" and user.is_approved==True:
-                login_user(user)
-                flash("Logged in!!","success")
-                return redirect(url_for("company_dashboard"))
-            elif user.role == "student" and user.is_approved==True:
-                login_user(user)
-                flash("Logged in!!","success")
-                return redirect(url_for("student_dashboard"))
-            elif user.is_approved==False:
-                logout_user()
-                flash("You are blacklisted for malicious activity","danger")
-            else:
-                flash('Invalid Credentials',"danger")
-
+            elif user.role == "student":
+                if user.is_blacklisted:
+                    flash("You are blacklisted for malicious activity","danger")
+                    return redirect(url_for("login"))
+                else:
+                    login_user(user)
+                    flash("Logged in!!","success")
+                    return redirect(url_for("student_dashboard"))
+            
     return render_template('auth/login.html')
 
 
@@ -86,7 +91,8 @@ def company_reg():
         company=Company_Profiles(user_id=user.id,company_name=request.form["company_name"],approval_status="pending",hr_number=request.form["hr_num"],website_url=request.form["website_url"],description=request.form.get('description'))
         db.session.add(company)
         db.session.commit()
-        return redirect(url_for("login"))
+        flash("Company registration Filed successfully,Wait For Verification!", "warning")
+        return redirect(url_for("home"))
     return render_template('auth/company_reg.html')
 
 
@@ -124,6 +130,7 @@ def student_reg():
                                  resume_path= filepath if filename else None)
         db.session.add(student)
         db.session.commit()
+        flash("Registration Successful!! Please Login to Continue","success")
         return redirect(url_for("login"))
     
     return render_template('auth/student_reg.html')
@@ -266,7 +273,7 @@ def reject_company(company_id):
 @app.route("/admin/blacklist_user/<int:user_id>")
 def blacklist_user(user_id):
     user=User.query.get(user_id)
-    user.is_approved=False
+    user.is_blacklisted=True
     db.session.commit()
     flash("User Blacklisted!!","danger")
     return redirect(request.referrer)
@@ -275,7 +282,7 @@ def blacklist_user(user_id):
 @app.route("/admin/whitelist_user/<int:user_id>")
 def whitelist_user(user_id):
     user=User.query.get(user_id)
-    user.is_approved=True
+    user.is_blacklisted=False
     db.session.commit()
     flash("User Whitelisted!!","info")
     return redirect(request.referrer)
@@ -442,7 +449,7 @@ def view_student_admin(student_id):
 @app.route('/company_dashboard/drive/<int:drive_id>/applicants')
 @login_required
 def view_drive_applicants(drive_id):
-    if current_user.role != 'company' or current_user.role!='admin':
+    if current_user.role != 'company':
         abort(403)
     drive = Placement_Drives.query.get_or_404(drive_id)
     if drive.company_id != current_user.id:
