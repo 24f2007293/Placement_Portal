@@ -514,6 +514,22 @@ def company_dashboard():
         closed_drives=closed_drives
     )
 
+
+#edit company details 
+@app.route('/company_dasboard/edit_profile',methods=['GET','POST'])
+@login_required
+def edit_cprofile():
+    company=Company_Profiles.query.filter_by(user_id=current_user.id)
+    if request.method=='POST':
+        company.company_name=request.form.get('company_name')
+        company.hr_number=request.form.get('hr_num')
+        company.website_url=request.form.get('website_url')
+        company.description=request.form.get('description')
+        db.session.commit()
+        flash("Company profile updated successfully", "success")
+        return redirect(url_for('company_dashboard'))
+    return render_template('company/edit.html', company=company)
+
 @app.route('/company_dashboard/drive/<int:drive_id>')
 @login_required
 def company_drive_details(drive_id):

@@ -1,116 +1,911 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Student Dashboard</title>
-</head>
-<body>
-    {%extends "auth/base_form.html"%}
-    {%block content%}
-              <nav class="navbar navbar-dark bg-dark px-3">
-                    <div class="d-flex align-items-center justify-content-between w-100 text-white">
-                            <span style="text-align: right;">
-                                Welcome {{ current_user.student_profiles.first_name }} !
-                            </span>
-                            <span class="d-flex" style="text-align: left;">
-                                <form method="GET" action="{{url_for('admin_comp')}}" >
-                                    <div class="input-group align-items-center" >
-                                        <input class="py-0 " style="width: 150px; border-color: black;" type="text" name="q" placeholder="Search drive or company" >
-                                        <div class="input-group-text p-0 me-4 bg-dark" style="border: none;">
-                                            <button type="submit" class="input-group-text p-0 me-1 bg-dark" style="border: none;">
-                                                🔍
-                                            </button>
-                                        </div>
-                                    </div>
-                                </form>
-                                <a href="{{url_for('view_student_profile')}}" class="btn btn-outline-light btn-sm me-2">My Profile</a>
-                                <a href="{{url_for('application_history')}}" class="btn btn-outline-light btn-sm me-2">Application History</a>
-                                <a href="{{url_for('edit_sprofile')}}"  class="btn btn-outline-light btn-sm">Edit Profile</a>
-                                <a href="{{url_for('logout')}}" class="btn btn-danger btn-sm">Logout</a>
-                            </span>
-                    </div>
-                </nav>
+{% extends "auth/base_form.html" %}
+
+{% block content %}
+
+<style>
+
+    /* =========================
+       PAGE
+    ========================== */
+
+    body {
+        background: linear-gradient(
+            120deg,
+            #102a32 0%,
+            #193943 45%,
+            #2b5968 100%
+        );
+
+        min-height: 100vh;
+        color: white;
+
+        font-family: Arial, Helvetica, sans-serif;
+    }
+
+
+    /* =========================
+       NAVBAR
+    ========================== */
+
+    .student-navbar {
+
+        background-color: #212529;
+
+        width: 90%;
+
+        margin: 25px auto 0;
+
+        padding: 16px 25px;
+
+        border-radius: 2px;
+
+        box-shadow: 0 4px 12px rgba(0,0,0,0.20);
+    }
+
+
+    .welcome-text {
+
+        font-size: 18px;
+        font-weight: 500;
+
+    }
+
+
+    .student-navbar .btn {
+
+        border-radius: 20px;
+
+        padding: 6px 14px;
+
+        margin-left: 5px;
+
+        transition: 0.25s;
+
+    }
+
+
+    .student-navbar .btn-outline-light:hover {
+
+        background-color: white;
+
+        color: #212529;
+
+    }
+
+
+    /* =========================
+       SEARCH BAR
+    ========================== */
+
+    .search-input {
+
+        width: 190px;
+
+        border: none;
+
+        border-radius: 20px 0 0 20px;
+
+        padding: 6px 12px;
+
+        outline: none;
+
+        font-size: 14px;
+
+    }
+
+
+    .search-button {
+
+        border: none;
+
+        background-color: #3f5963;
+
+        color: white;
+
+        padding: 6px 12px;
+
+        border-radius: 0 20px 20px 0;
+
+        cursor: pointer;
+
+    }
+
+
+    .search-button:hover {
+
+        background-color: #4f6c77;
+
+    }
+
+
+    /* =========================
+       MAIN CONTAINER
+    ========================== */
+
+    .student-container {
+
+        width: 88%;
+
+        max-width: 1250px;
+
+        margin: 55px auto;
+
+    }
+
+
+    .dashboard-header {
+
+        text-align: center;
+
+        margin-bottom: 45px;
+
+    }
+
+
+    .dashboard-header h1 {
+
+        font-size: 42px;
+
+        font-weight: 700;
+
+        margin-bottom: 8px;
+
+    }
+
+
+    .dashboard-header p {
+
+        color: #d0d8dc;
+
+        font-size: 17px;
+
+    }
 
 
 
+    /* =========================
+       SECTIONS
+    ========================== */
+
+    .dashboard-section {
+
+        background-color: rgba(55, 80, 90, 0.88);
+
+        padding: 28px;
+
+        border-radius: 15px;
+
+        margin-bottom: 35px;
+
+        box-shadow: 0 4px 14px rgba(0,0,0,0.13);
+
+    }
 
 
-    <h1>Student Dashboard</h1>
-    <br>
-    <table class="table table-bordered w-100">
-        <h4>Companies</h4>
-    <tr><th>Company Name</th><th>Action</th></tr>
-    {%for com in companies%}
-    <tr><td>{{com.company_name}}</td>
-        <td>
-            <a href="{{url_for('view_company',company_id=com.user_id)}} " class="btn btn-outline-primary">view details</a>
-        </td>
-    </tr>
-    {%endfor%}
-    </table>
+    .section-title {
 
-<br>
+        font-size: 24px;
 
-    <h4>Applied Drives</h4>
+        font-weight: 600;
 
-<table class="table">
-    <tr>
-        <th>Sr No.</th>
-        <th>Drive Name</th>
-        <th>Company</th>
-        <th>Date</th>
-        <th>Status</th>
-        <th>Action</th>
-    </tr>
+        margin-bottom: 22px;
 
-    {% for app in applications %}
-    <tr>
-        <td>{{ loop.index }}</td>
-        <td>{{ app.drive.drive_name }}</td>
-        <td>{{ app.drive.company.company_name }}</td>
-        <td>{{ app.applied_at.strftime('%d/%m/%Y') }}</td>
-        <td>{{ app.status }}</td>
-        <td>
-            <button 
-                data-bs-toggle="modal"
-                data-bs-target="#modal{{ app.drive.id }}"
+        color: white;
+
+    }
+
+
+
+    /* =========================
+       TABLE
+    ========================== */
+
+    .custom-table {
+
+        width: 100%;
+
+        color: white;
+
+        margin-bottom: 0;
+
+        border-collapse: separate;
+
+        border-spacing: 0;
+
+        overflow: hidden;
+
+        border-radius: 10px;
+
+    }
+
+
+    .custom-table thead {
+
+        background-color: #212529;
+
+    }
+
+
+    .custom-table th {
+
+        padding: 15px;
+
+        color: white;
+
+        border: none;
+
+        font-weight: 600;
+
+    }
+
+
+    .custom-table td {
+
+        padding: 14px 15px;
+
+        vertical-align: middle;
+
+        border-color: rgba(255,255,255,0.08);
+
+    }
+
+
+    .custom-table tbody tr {
+
+        background-color: rgba(255,255,255,0.04);
+
+        transition: 0.2s;
+
+    }
+
+
+    .custom-table tbody tr:hover {
+
+        background-color: rgba(255,255,255,0.09);
+
+    }
+
+
+    /* =========================
+       VIEW BUTTON
+    ========================== */
+
+    .view-btn {
+
+        border: 1px solid #21d4fd;
+
+        color: #21d4fd;
+
+        border-radius: 20px;
+
+        padding: 5px 15px;
+
+        background: transparent;
+
+        text-decoration: none;
+
+        transition: 0.2s;
+
+    }
+
+
+    .view-btn:hover {
+
+        background-color: #21d4fd;
+
+        color: #102a32;
+
+    }
+
+
+
+    /* =========================
+       STATUS BADGES
+    ========================== */
+
+    .status-badge {
+
+        padding: 5px 12px;
+
+        border-radius: 15px;
+
+        font-size: 13px;
+
+        font-weight: 600;
+
+        display: inline-block;
+
+    }
+
+
+    .status-pending {
+
+        background-color: rgba(255,193,7,0.18);
+
+        color: #ffc107;
+
+    }
+
+
+    .status-approved {
+
+        background-color: rgba(46,204,113,0.18);
+
+        color: #55efc4;
+
+    }
+
+
+    .status-rejected {
+
+        background-color: rgba(255,80,80,0.18);
+
+        color: #ff7675;
+
+    }
+
+
+
+    /* =========================
+       MODAL
+    ========================== */
+
+    .modal-content {
+
+        background-color: #263f49;
+
+        color: white;
+
+        border-radius: 15px;
+
+        border: none;
+
+        box-shadow: 0 8px 30px rgba(0,0,0,0.35);
+
+    }
+
+
+    .modal-content h4 {
+
+        font-weight: 700;
+
+        margin-bottom: 20px;
+
+    }
+
+
+    .modal-content p {
+
+        color: #d8e1e5;
+
+    }
+
+
+    .modal-content strong {
+
+        color: white;
+
+    }
+
+
+    /* =========================
+       FOOTER
+    ========================== */
+
+    .student-footer {
+
+        text-align: center;
+
+        margin-top: 55px;
+
+        padding-bottom: 30px;
+
+        color: #d0d8dc;
+
+    }
+
+
+
+    /* =========================
+       MOBILE
+    ========================== */
+
+    @media (max-width: 900px) {
+
+        .student-navbar {
+
+            width: 95%;
+
+        }
+
+        .student-navbar > div {
+
+            flex-direction: column;
+
+            gap: 15px;
+
+        }
+
+        .student-navbar span {
+
+            flex-wrap: wrap;
+
+            justify-content: center;
+
+        }
+
+        .student-container {
+
+            width: 95%;
+
+        }
+
+        .dashboard-section {
+
+            overflow-x: auto;
+
+        }
+
+        .dashboard-header h1 {
+
+            font-size: 32px;
+
+        }
+
+    }
+
+</style>
+
+
+
+<!-- =========================
+     NAVBAR
+========================== -->
+
+<nav class="navbar student-navbar">
+
+    <div class="d-flex align-items-center justify-content-between w-100 text-white">
+
+        <span class="welcome-text">
+
+            Welcome {{ current_user.student_profiles.first_name }} !
+
+        </span>
+
+
+        <span class="d-flex align-items-center">
+
+
+            <!-- SEARCH -->
+
+            <form
+                method="GET"
+                action="{{ url_for('admin_comp') }}"
+                class="me-3"
             >
-                view details
-            </button>
-        </td>
-    </tr>
-    <div class="modal fade" id="modal{{ app.drive.id }}" tabindex="-1">
-  <div class="modal-dialog">
-    <div class="modal-content p-3">
 
-        <h4>{{ app.drive.drive_name }}</h4>
+                <div class="d-flex">
 
-        <p><strong>Job Title:</strong> {{ app.drive.job_title }}</p>
-        <p><strong>Description:</strong> {{ app.drive.description }}</p>
-        <p><strong>Salary:</strong> {{ app.drive.ctc }}</p>
-        <p><strong>Location:</strong> {{ app.drive.location }}</p>
-        
+                    <input
+                        class="search-input"
+                        type="text"
+                        name="q"
+                        placeholder="Search drive or company"
+                    >
 
-        <button class="btn btn-secondary" data-bs-dismiss="modal">
-            Close
-        </button>
+                    <button
+                        type="submit"
+                        class="search-button"
+                    >
+
+                        🔍
+
+                    </button>
+
+                </div>
+
+            </form>
+
+
+
+            <a
+                href="{{ url_for('view_student_profile') }}"
+                class="btn btn-outline-light btn-sm"
+            >
+                My Profile
+            </a>
+
+
+            <a
+                href="{{ url_for('application_history') }}"
+                class="btn btn-outline-light btn-sm"
+            >
+                Application History
+            </a>
+
+
+            <a
+                href="{{ url_for('edit_sprofile') }}"
+                class="btn btn-outline-light btn-sm"
+            >
+                Edit Profile
+            </a>
+
+
+            <a
+                href="{{ url_for('logout') }}"
+                class="btn btn-danger btn-sm"
+            >
+                Logout
+            </a>
+
+        </span>
 
     </div>
-  </div>
-</div>
+
+</nav>
+
+
+
+<!-- =========================
+     MAIN CONTENT
+========================== -->
+
+<div class="student-container">
+
+
+    <!-- HEADER -->
+
+    <div class="dashboard-header">
+
+        <h1>Student Dashboard</h1>
+
+        <p>
+            Explore companies and track your placement applications
+        </p>
+
+    </div>
+
+
+
+
+    <!-- =========================
+         COMPANIES
+    ========================== -->
+
+    <div class="dashboard-section">
+
+
+        <h4 class="section-title">
+            Companies
+        </h4>
+
+
+        <div class="table-responsive">
+
+            <table class="table custom-table">
+
+                <thead>
+
+                    <tr>
+
+                        <th>
+                            Company Name
+                        </th>
+
+                        <th>
+                            Action
+                        </th>
+
+                    </tr>
+
+                </thead>
+
+
+                <tbody>
+
+                    {% for com in companies %}
+
+                    <tr>
+
+                        <td>
+
+                            {{ com.company_name }}
+
+                        </td>
+
+
+                        <td>
+
+                            <a
+                                href="{{ url_for('view_company', company_id=com.user_id) }}"
+                                class="view-btn"
+                            >
+
+                                View Details
+
+                            </a>
+
+                        </td>
+
+                    </tr>
+
+                    {% endfor %}
+
+                </tbody>
+
+            </table>
+
+        </div>
+
+    </div>
+
+
+
+    <!-- =========================
+         APPLIED DRIVES
+    ========================== -->
+
+    <div class="dashboard-section">
+
+
+        <h4 class="section-title">
+            Applied Drives
+        </h4>
+
+
+        <div class="table-responsive">
+
+
+            <table class="table custom-table">
+
+                <thead>
+
+                    <tr>
+
+                        <th>Sr No.</th>
+
+                        <th>Drive Name</th>
+
+                        <th>Company</th>
+
+                        <th>Date</th>
+
+                        <th>Status</th>
+
+                        <th>Action</th>
+
+                    </tr>
+
+                </thead>
+
+
+                <tbody>
+
+
+                    {% for app in applications %}
+
+
+                    <tr>
+
+                        <td>
+
+                            {{ loop.index }}
+
+                        </td>
+
+
+                        <td>
+
+                            {{ app.drive.drive_name }}
+
+                        </td>
+
+
+                        <td>
+
+                            {{ app.drive.company.company_name }}
+
+                        </td>
+
+
+                        <td>
+
+                            {{ app.applied_at.strftime('%d/%m/%Y') }}
+
+                        </td>
+
+
+
+                        <td>
+
+
+                            {% if app.status|lower == "pending" %}
+
+                                <span class="status-badge status-pending">
+
+                                    {{ app.status }}
+
+                                </span>
+
+
+                            {% elif app.status|lower == "approved" %}
+
+                                <span class="status-badge status-approved">
+
+                                    {{ app.status }}
+
+                                </span>
+
+
+                            {% elif app.status|lower == "rejected" %}
+
+                                <span class="status-badge status-rejected">
+
+                                    {{ app.status }}
+
+                                </span>
+
+
+                            {% else %}
+
+                                <span class="status-badge">
+
+                                    {{ app.status }}
+
+                                </span>
+
+                            {% endif %}
+
+
+                        </td>
+
+
+
+                        <td>
+
+
+                            <button
+                                class="view-btn"
+                                data-bs-toggle="modal"
+                                data-bs-target="#modal{{ app.drive.id }}"
+                            >
+
+                                View Details
+
+                            </button>
+
+
+                        </td>
+
+                    </tr>
+
+
+                    {% endfor %}
+
+
+                </tbody>
+
+            </table>
+
+
+        </div>
+
+
+    </div>
+
+
+
+
+    <!-- =========================
+         MODALS
+    ========================== -->
+
+
+    {% for app in applications %}
+
+
+    <div
+        class="modal fade"
+        id="modal{{ app.drive.id }}"
+        tabindex="-1"
+    >
+
+
+        <div class="modal-dialog modal-dialog-centered">
+
+
+            <div class="modal-content p-4">
+
+
+                <h4>
+
+                    {{ app.drive.drive_name }}
+
+                </h4>
+
+
+                <p>
+
+                    <strong>Company:</strong>
+
+                    {{ app.drive.company.company_name }}
+
+                </p>
+
+
+                <p>
+
+                    <strong>Job Title:</strong>
+
+                    {{ app.drive.job_title }}
+
+                </p>
+
+
+                <p>
+
+                    <strong>Description:</strong>
+
+                    {{ app.drive.description }}
+
+                </p>
+
+
+                <p>
+
+                    <strong>Salary:</strong>
+
+                    {{ app.drive.ctc }}
+
+                </p>
+
+
+                <p>
+
+                    <strong>Location:</strong>
+
+                    {{ app.drive.location }}
+
+                </p>
+
+
+                <div class="text-end mt-3">
+
+                    <button
+                        class="btn btn-secondary"
+                        data-bs-dismiss="modal"
+                    >
+
+                        Close
+
+                    </button>
+
+                </div>
+
+
+            </div>
+
+        </div>
+
+    </div>
+
+
     {% endfor %}
-</table>
-    
-    
-    <p></p>
-    
 
 
 
-    {%endblock%}
+
+    <!-- FOOTER -->
+
+    <div class="student-footer">
+
+        © 2026 Placement Portal | Campus Placement System
+
+    </div>
 
 
+</div>
 
-</body>
-</html>
+
+{% endblock %}

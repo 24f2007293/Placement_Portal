@@ -1,75 +1,347 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin Dashboard</title>
-</head>
-<body>
-    {%extends "auth/base_form.html"%}
-    {%block content%}
-                        <nav class="navbar navbar-dark bg-dark px-3">
-                    <div class="d-flex align-items-center justify-content-between w-100 text-white">
-                            <span style="text-align: right;">
-                                Welcome Admin !!
-                            </span>
-                            <span style="text-align: left;">
-                                <a href="{{url_for('admin_comp')}}" class="btn btn-outline-light btn-sm">Companies</a>
-                                <a href="{{url_for('admin_students')}}" class="btn btn-outline-light btn-sm">Students</a>
-                                <a href="{{url_for('admin_drives')}}" class="btn btn-outline-light btn-sm">Drives</a>
-                                <a href="{{url_for('admin_applications')}}" class="btn btn-outline-light btn-sm">Job Applications</a>
-                                <a href="{{url_for('logout')}}" class="btn btn-danger btn-sm">Logout</a>
-                            </span>
-                    </div>
-                </nav>
+{% extends "auth/base_form.html" %}
+
+{% block content %}
+
+<style>
+    /* Page background */
+    body {
+        background: linear-gradient(
+            120deg,
+            #102a32 0%,
+            #193943 45%,
+            #2b5968 100%
+        );
+        min-height: 100vh;
+        color: white;
+        font-family: Arial, Helvetica, sans-serif;
+    }
+
+    /* Navbar */
+    .admin-navbar {
+        background-color: #212529;
+        padding: 18px 28px;
+        margin: 25px auto 0;
+        width: 85%;
+        box-shadow: 0 3px 10px rgba(0, 0, 0, 0.20);
+    }
+
+    .admin-navbar .welcome {
+        font-size: 20px;
+        font-weight: 500;
+    }
+
+    /* Navbar buttons */
+    .admin-navbar .btn {
+        margin-left: 6px;
+        border-radius: 20px;
+        padding: 6px 15px;
+        transition: 0.25s;
+    }
+
+    .admin-navbar .btn-outline-light:hover {
+        background-color: white;
+        color: #212529;
+    }
+
+    /* Dashboard container */
+    .dashboard-container {
+        width: 75%;
+        max-width: 1100px;
+        margin: 60px auto;
+    }
+
+    /* Dashboard heading */
+    .dashboard-title {
+        text-align: center;
+        margin-bottom: 45px;
+    }
+
+    .dashboard-title h1 {
+        font-size: 42px;
+        font-weight: 700;
+        margin-bottom: 8px;
+    }
+
+    .dashboard-title p {
+        color: #d0d8dc;
+        font-size: 18px;
+    }
+
+    /* Dashboard cards */
+    .dashboard-card {
+        background-color: rgba(64, 91, 101, 0.88);
+        border: none;
+        border-radius: 15px;
+        padding: 28px 25px;
+        min-height: 150px;
+
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+
+        text-align: center;
+
+        box-shadow: 0 3px 12px rgba(0, 0, 0, 0.08);
+
+        transition:
+            transform 0.25s ease,
+            background-color 0.25s ease,
+            box-shadow 0.25s ease;
+    }
+
+    .dashboard-card:hover {
+        transform: translateY(-5px);
+        background-color: rgba(72, 103, 115, 0.95);
+        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.18);
+    }
+
+    .dashboard-card h5 {
+        color: #d5dde1;
+        font-size: 18px;
+        margin-bottom: 12px;
+        font-weight: 500;
+    }
+
+    .dashboard-card h3 {
+        color: white;
+        font-size: 36px;
+        font-weight: bold;
+        margin: 0;
+    }
+
+    /* Different highlights for useful statistics */
+
+    .companies h3 {
+        color: #21d4fd;
+    }
+
+    .students h3 {
+        color: #55efc4;
+    }
+
+    .unapproved h3 {
+        color: #ffc107;
+    }
+
+    .pending h3 {
+        color: #ffbe76;
+    }
+
+    .ongoing h3 {
+        color: #00cec9;
+    }
+
+    .applications h3 {
+        color: #74b9ff;
+    }
+
+    /* Footer */
+    .admin-footer {
+        text-align: center;
+        color: #d0d8dc;
+        margin-top: 65px;
+        padding-bottom: 30px;
+        font-size: 16px;
+    }
+
+    /* Mobile */
+    @media (max-width: 768px) {
+
+        .admin-navbar {
+            width: 95%;
+        }
+
+        .admin-navbar > div {
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .admin-navbar .btn {
+            margin: 3px;
+        }
+
+        .dashboard-container {
+            width: 90%;
+            margin-top: 40px;
+        }
+
+        .dashboard-title h1 {
+            font-size: 32px;
+        }
+    }
+
+</style>
 
 
-    <h1 style="text-align: center;">Admin Dashboard</h1>
-        <div>
-            <div class="row">
+<!-- NAVBAR -->
 
-        <div class="col-md-4 mb-3">
-            <div class="card p-3">
-                <h5>Total Companies</h5>
-                <h3>{{ total_companies }}</h3>
-            </div>
-        </div>
+<nav class="navbar admin-navbar">
 
-        <div class="col-md-4 mb-3">
-            <div class="card p-3">
-                <h5>Total Students</h5>
-                <h3>{{ total_students }}</h3>
-            </div>
-        </div>
+    <div class="d-flex align-items-center justify-content-between w-100 text-white">
 
-        <div class="col-md-4 mb-3">
-            <div class="card p-3">
-                <h5>Unapproved Companies</h5>
-                <h3>{{ unapproved_companies }}</h3>
-            </div>
-        </div>
+        <span class="welcome">
+            Welcome Admin !!
+        </span>
 
-        <div class="col-md-4 mb-3">
-            <div class="card p-3">
-                <h5>Pending Drives</h5>
-                <h3>{{ pending_drives }}</h3>
-            </div>
-        </div>
+        <span>
 
-        <div class="col-md-4 mb-3">
-            <div class="card p-3">
-                <h5>Ongoing Drives</h5>
-                <h3>{{ ongoing_drives }}</h3>
-            </div>
-        </div>
+            <a href="{{ url_for('admin_comp') }}"
+               class="btn btn-outline-light btn-sm">
+                Companies
+            </a>
 
-        <div class="col-md-4 mb-3">
-            <div class="card p-3">
-                <h5>Total Applications</h5>
-                <h3>{{ total_applications }}</h3>
-            </div>
-        </div>
+            <a href="{{ url_for('admin_students') }}"
+               class="btn btn-outline-light btn-sm">
+                Students
+            </a>
+
+            <a href="{{ url_for('admin_drives') }}"
+               class="btn btn-outline-light btn-sm">
+                Drives
+            </a>
+
+            <a href="{{ url_for('admin_applications') }}"
+               class="btn btn-outline-light btn-sm">
+                Job Applications
+            </a>
+
+            <a href="{{ url_for('logout') }}"
+               class="btn btn-danger btn-sm">
+                Logout
+            </a>
+
+        </span>
+
     </div>
-    {%endblock%}
-</body>
-</html>
+
+</nav>
+
+
+
+<!-- DASHBOARD -->
+
+<div class="dashboard-container">
+
+    <div class="dashboard-title">
+
+        <h1>Admin Dashboard</h1>
+
+        <p>
+            Manage companies, students, placement drives and applications
+        </p>
+
+    </div>
+
+
+    <div class="row g-4">
+
+
+        <!-- COMPANIES -->
+
+        <div class="col-md-4">
+
+            <div class="dashboard-card companies">
+
+                <h5>Total Companies</h5>
+
+                <h3>{{ total_companies }}</h3>
+
+            </div>
+
+        </div>
+
+
+
+        <!-- STUDENTS -->
+
+        <div class="col-md-4">
+
+            <div class="dashboard-card students">
+
+                <h5>Total Students</h5>
+
+                <h3>{{ total_students }}</h3>
+
+            </div>
+
+        </div>
+
+
+
+        <!-- UNAPPROVED COMPANIES -->
+
+        <div class="col-md-4">
+
+            <div class="dashboard-card unapproved">
+
+                <h5>Unapproved Companies</h5>
+
+                <h3>{{ unapproved_companies }}</h3>
+
+            </div>
+
+        </div>
+
+
+
+        <!-- PENDING DRIVES -->
+
+        <div class="col-md-4">
+
+            <div class="dashboard-card pending">
+
+                <h5>Pending Drives</h5>
+
+                <h3>{{ pending_drives }}</h3>
+
+            </div>
+
+        </div>
+
+
+
+        <!-- ONGOING DRIVES -->
+
+        <div class="col-md-4">
+
+            <div class="dashboard-card ongoing">
+
+                <h5>Ongoing Drives</h5>
+
+                <h3>{{ ongoing_drives }}</h3>
+
+            </div>
+
+        </div>
+
+
+
+        <!-- APPLICATIONS -->
+
+        <div class="col-md-4">
+
+            <div class="dashboard-card applications">
+
+                <h5>Total Applications</h5>
+
+                <h3>{{ total_applications }}</h3>
+
+            </div>
+
+        </div>
+
+
+    </div>
+
+
+    <div class="admin-footer">
+
+        © 2026 Placement Portal | Campus Placement System
+
+    </div>
+
+
+</div>
+
+{% endblock %}

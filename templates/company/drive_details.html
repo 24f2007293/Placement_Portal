@@ -1,119 +1,566 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Drive Details</title>
-</head>
-<body>
-    {% extends "auth/base_form.html" %}
-    {% block content %}
-        <div class="container pb-5 py-4">
-            <div class="d-flex justify-content-between align-items-center mb-4">
-                <div>
-                    <h1 class="mb-1">{{ drive.drive_name }}</h1>
-                    <p class="text-muted mb-0">Drive details and applications</p>
-                </div>
-                <a href="{{ url_for('company_dashboard') }}" class="btn btn-outline-secondary">Back to Dashboard</a>
-            </div>
+{% extends "auth/Base_form.html" %}
 
-            <div class="card mb-4">
-                <div class="card-body">
-                    <h5 class="card-title">{{ drive.job_title }}</h5>
-                    <p class="card-text"><strong>Job Type:</strong> {{ drive.job_type }}</p>
-                    <p class="card-text"><strong>Location:</strong> {{ drive.location }}</p>
-                    <p class="card-text"><strong>CTC:</strong> {{ drive.ctc }}</p>
-                    <p class="card-text"><strong>CGPA Required:</strong> {{ drive.cgpa }}</p>
-                    <p class="card-text"><strong>Deadline:</strong> {{ drive.application_deadline }}</p>
-                    <p class="card-text"><strong>Status:</strong> {{ drive.drive_status }}</p>
-                    <p class="card-text"><strong>Description:</strong> {{ drive.description }}</p>
-                </div>
-            </div>
+{% block title %}Drive Details{% endblock %}
+
+{% block content %}
+
+<style>
+
+    body {
+        background: linear-gradient(
+            120deg,
+            #102a32 0%,
+            #193943 45%,
+            #2b5968 100%
+        );
+        min-height: 100vh;
+        color: white;
+        font-family: Arial, Helvetica, sans-serif;
+    }
+
+    .drive-container {
+        width: 88%;
+        max-width: 1250px;
+        margin: 45px auto;
+    }
+
+    .drive-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 30px;
+    }
+
+    .drive-header h1 {
+        font-size: 38px;
+        font-weight: 700;
+        margin-bottom: 5px;
+    }
+
+    .drive-header p {
+        color: #cbd7db;
+        margin: 0;
+    }
+
+    .back-btn {
+        border: 1px solid #ffffff;
+        color: white;
+        background: transparent;
+        border-radius: 20px;
+        padding: 7px 16px;
+        text-decoration: none;
+        transition: 0.2s;
+    }
+
+    .back-btn:hover {
+        background-color: white;
+        color: #102a32;
+    }
+
+    .details-card {
+        background-color: rgba(55, 80, 90, 0.92);
+        border: none;
+        border-radius: 15px;
+        padding: 26px;
+        margin-bottom: 35px;
+        box-shadow: 0 4px 14px rgba(0,0,0,0.15);
+    }
+
+    .details-card h5 {
+        font-size: 24px;
+        font-weight: 600;
+        margin-bottom: 22px;
+        color: white;
+    }
+
+    .detail-row {
+        padding: 10px 0;
+        border-bottom: 1px solid rgba(255,255,255,0.08);
+        color: #dbe4e7;
+    }
+
+    .detail-row:last-child {
+        border-bottom: none;
+    }
+
+    .detail-row strong {
+        color: white;
+    }
+
+    .applications-section {
+        background-color: rgba(55, 80, 90, 0.92);
+        border-radius: 15px;
+        padding: 28px;
+        box-shadow: 0 4px 14px rgba(0,0,0,0.15);
+    }
+
+    .section-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 22px;
+    }
+
+    .section-header h3 {
+        margin: 0;
+        font-size: 24px;
+        font-weight: 600;
+    }
+
+    .applicants-btn {
+        border: 1px solid #21d4fd;
+        color: #21d4fd;
+        background: transparent;
+        border-radius: 20px;
+        padding: 7px 16px;
+        text-decoration: none;
+        transition: 0.2s;
+    }
+
+    .applicants-btn:hover {
+        background-color: #21d4fd;
+        color: #102a32;
+    }
+
+    .custom-table {
+        width: 100%;
+        margin: 0;
+
+        --bs-table-bg: #314b55;
+        --bs-table-color: #ffffff;
+        --bs-table-striped-bg: #38545f;
+        --bs-table-striped-color: #ffffff;
+        --bs-table-hover-bg: #405e69;
+        --bs-table-hover-color: #ffffff;
+
+        border-color: rgba(255,255,255,0.08);
+    }
+
+    .custom-table th {
+        background-color: #212529;
+        color: white;
+        border: none;
+        padding: 14px;
+    }
+
+    .custom-table td {
+        color: #f1f5f7;
+        padding: 14px;
+        vertical-align: middle;
+        border-color: rgba(255,255,255,0.08);
+    }
+
+    .student-email {
+        color: #b8c7cc;
+        font-size: 13px;
+    }
+
+    .form-select {
+        background-color: #263f49;
+        color: white;
+        border-color: #607b85;
+    }
+
+    .form-select:focus {
+        background-color: #263f49;
+        color: white;
+        border-color: #21d4fd;
+        box-shadow: none;
+    }
+
+    .update-btn {
+        background-color: #21d4fd;
+        color: #102a32;
+        border: none;
+        border-radius: 18px;
+        padding: 6px 14px;
+        font-weight: 600;
+    }
+
+    .update-btn:hover {
+        background-color: #7be4fb;
+        color: #102a32;
+    }
+
+    .view-btn {
+        border: 1px solid #21d4fd;
+        color: #21d4fd;
+        background: transparent;
+        border-radius: 18px;
+        padding: 6px 14px;
+    }
+
+    .view-btn:hover {
+        background-color: #21d4fd;
+        color: #102a32;
+    }
+
+    .modal-content {
+        background-color: #263f49;
+        color: white;
+        border: none;
+        border-radius: 15px;
+        padding: 10px;
+    }
+
+    .modal-content p {
+        color: #d7e0e3;
+    }
+
+    .resume-btn {
+        border: 1px solid #21d4fd;
+        color: #21d4fd;
+        border-radius: 18px;
+    }
+
+    .resume-btn:hover {
+        background-color: #21d4fd;
+        color: #102a32;
+    }
+
+    .empty-message {
+        color: #bdc8cc;
+        margin-bottom: 0;
+    }
+
+    @media (max-width: 768px) {
+
+        .drive-container {
+            width: 95%;
+        }
+
+        .drive-header {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 18px;
+        }
+
+        .section-header {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 15px;
+        }
+
+        .drive-header h1 {
+            font-size: 30px;
+        }
+    }
+
+</style>
 
 
-            <div>
-                <div class="d-flex justify-content-between align-items-center mb-3">
-                    <h3 class="mb-0">Received Applications</h3>
-                    <a href="{{ url_for('view_drive_applicants', drive_id=drive.id) }}" class="btn btn-outline-primary">View All Applicants</a>
-                </div>
-                {% if applications %}
-                    <div class="table-responsive">
-                        <table class="table table-bordered table-striped align-middle">
-                            <thead class="table-light">
-                                <tr>
-                                    <th>Student Name</th>
-                                    <th>Applied On</th>
-                                    <th>Current Status</th>
-                                    <th width="300px;">Actions</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {% for app in applications %}
-                                    <tr>
-                                        <td>
-                                            <strong>{{ app.student.first_name }} {{ app.student.last_name }}</strong>
-                                            <div class="text-muted small">{{ app.student.user.email }}</div>
-                                        </td>
-                                        <td>{{ app.applied_at.strftime('%Y-%m-%d %H:%M') }}</td>
-                                        <td>
-                                            <span class="badge 
-                                                {% if app.status == 'applied' %}bg-secondary
-                                                {% elif app.status == 'shortlisted' %}bg-info
-                                                {% elif app.status == 'selected' %}bg-success
-                                                {% elif app.status == 'rejected' %}bg-danger
-                                                {% endif %}">
-                                                {{ app.status|capitalize }}
-                                            </span>
-                                        </td>
-                                        <td>
-                                            <div class="d-flex gap-2 align-items-center justify-content-end">
-                                                <form method="POST" action="{{ url_for('update_application_status', app_id=app.id) }}" class="d-flex gap-2">
-                                                    <select name="status" class="form-select form-select-sm" style="max-width: 150px;">
-                                                        <option value="">Change Status...</option>
-                                                        <option value="shortlisted" {% if app.status == 'shortlisted' %}selected{% endif %}>Shortlist</option>
-                                                        <option value="selected" {% if app.status == 'selected' %}selected{% endif %}>Select</option>
-                                                        <option value="rejected" {% if app.status == 'rejected' %}selected{% endif %}>Reject</option>
-                                                        <option value="applied" {% if app.status == 'applied' %}selected{% endif %}>Mark as Applied</option>
-                                                    </select>
-                                                    <button type="submit" class="btn btn-sm btn-primary">Update</button>
-                                                </form>
-                                                
-                                                <button type="button" class="btn btn-sm btn-info" data-bs-toggle="modal" data-bs-target="#modal{{ app.student.id }}">
-                                                    View Details
-                                                </button>
-                                            </div>
-                                    <div class="modal fade" id="modal{{ app.student.id }}" tabindex="-1">
-                                        <div class="modal-dialog">
-                                            <div class="modal-content p-3">
+<div class="drive-container">
 
-                                                <h4>{{ app.student.first_name }} {{ app.student.last_name }}</h4>
-                                                <p><strong>Email:</strong> {{ app.student.user.email }}</p>
-                                                <p><strong>CGPA:</strong> {{ app.student.cgpa }}</p>
-                                                <p><strong>Graduation Year:</strong> {{ app.student.graduation_year }}</p>
-                                                <p><strong>Resume:</strong> 
-                                                    {% if app.student.resume_path %}
-                                                        <a href="{{ url_for('static', filename=app.student.resume_path.replace('static/', '').replace('\\', '/')) }}" target="_blank" class="btn btn-sm btn-outline-primary">View Resume</a>
-                                                    {% else %}
-                                                        <span class="text-muted">No resume uploaded</span>
-                                                    {% endif %}
-                                                <div class="mt-3">
-                                                    <button class="btn btn-secondary" data-bs-dismiss="modal">
-                                                        Close
-                                                    </button>
-                                                </div>
+    <div class="drive-header">
 
-                                            </div>
-                                        </div>
-                                    </div>
-                                {% endfor %}
-                            </tbody>
-                        </table>
-                    </div>
-                {% else %}
-                    <p class="text-muted">No applications have been received yet.</p>
-                {% endif %}
-            </div>
+        <div>
+            <h1>{{ drive.drive_name }}</h1>
+            <p>Drive details and applications</p>
         </div>
-    {% endblock %}
-</body>
-</html>
+
+        <a
+            href="{{ url_for('company_dashboard') }}"
+            class="back-btn"
+        >
+            Back to Dashboard
+        </a>
+
+    </div>
+
+
+    <!-- Drive info -->
+    <div class="details-card">
+
+        <h5>{{ drive.job_title }}</h5>
+
+        <div class="detail-row">
+            <strong>Job Type:</strong>
+            {{ drive.job_type }}
+        </div>
+
+        <div class="detail-row">
+            <strong>Location:</strong>
+            {{ drive.location }}
+        </div>
+
+        <div class="detail-row">
+            <strong>CTC:</strong>
+            {{ drive.ctc }}
+        </div>
+
+        <div class="detail-row">
+            <strong>CGPA Required:</strong>
+            {{ drive.cgpa }}
+        </div>
+
+        <div class="detail-row">
+            <strong>Deadline:</strong>
+            {{ drive.application_deadline }}
+        </div>
+
+        <div class="detail-row">
+            <strong>Status:</strong>
+            {{ drive.drive_status|capitalize }}
+        </div>
+
+        <div class="detail-row">
+            <strong>Description:</strong>
+            {{ drive.description }}
+        </div>
+
+    </div>
+
+
+    <!-- Applications -->
+    <div class="applications-section">
+
+        <div class="section-header">
+
+            <h3>Received Applications</h3>
+
+            <a
+                href="{{ url_for('view_drive_applicants', drive_id=drive.id) }}"
+                class="applicants-btn"
+            >
+                View All Applicants
+            </a>
+
+        </div>
+
+
+        {% if applications %}
+
+            <div class="table-responsive">
+
+                <table class="table custom-table align-middle">
+
+                    <thead>
+
+                        <tr>
+                            <th>Student Name</th>
+                            <th>Applied On</th>
+                            <th>Current Status</th>
+                            <th style="width: 360px;">Actions</th>
+                        </tr>
+
+                    </thead>
+
+                    <tbody>
+
+                        {% for app in applications %}
+
+                        <tr>
+
+                            <td>
+
+                                <strong>
+                                    {{ app.student.first_name }}
+                                    {{ app.student.last_name }}
+                                </strong>
+
+                                <div class="student-email">
+                                    {{ app.student.user.email }}
+                                </div>
+
+                            </td>
+
+
+                            <td>
+                                {{ app.applied_at.strftime('%Y-%m-%d %H:%M') }}
+                            </td>
+
+
+                            <td>
+
+                                <span class="badge
+
+                                    {% if app.status == 'applied' %}
+                                        bg-secondary
+
+                                    {% elif app.status == 'shortlisted' %}
+                                        bg-info
+
+                                    {% elif app.status == 'selected' %}
+                                        bg-success
+
+                                    {% elif app.status == 'rejected' %}
+                                        bg-danger
+
+                                    {% endif %}
+                                ">
+
+                                    {{ app.status|capitalize }}
+
+                                </span>
+
+                            </td>
+
+
+                            <td>
+
+                                <div class="d-flex gap-2 align-items-center justify-content-end">
+
+                                    <form
+                                        method="POST"
+                                        action="{{ url_for('update_application_status', app_id=app.id) }}"
+                                        class="d-flex gap-2"
+                                    >
+
+                                        <select
+                                            name="status"
+                                            class="form-select form-select-sm"
+                                            style="max-width: 150px;"
+                                        >
+
+                                            <option value="">
+                                                Change Status...
+                                            </option>
+
+                                            <option
+                                                value="shortlisted"
+                                                {% if app.status == 'shortlisted' %}selected{% endif %}
+                                            >
+                                                Shortlist
+                                            </option>
+
+                                            <option
+                                                value="selected"
+                                                {% if app.status == 'selected' %}selected{% endif %}
+                                            >
+                                                Select
+                                            </option>
+
+                                            <option
+                                                value="rejected"
+                                                {% if app.status == 'rejected' %}selected{% endif %}
+                                            >
+                                                Reject
+                                            </option>
+
+                                            <option
+                                                value="applied"
+                                                {% if app.status == 'applied' %}selected{% endif %}
+                                            >
+                                                Mark as Applied
+                                            </option>
+
+                                        </select>
+
+
+                                        <button
+                                            type="submit"
+                                            class="update-btn"
+                                        >
+                                            Update
+                                        </button>
+
+                                    </form>
+
+
+                                    <button
+                                        type="button"
+                                        class="view-btn"
+                                        data-bs-toggle="modal"
+                                        data-bs-target="#modal{{ app.student.id }}"
+                                    >
+                                        View Details
+                                    </button>
+
+                                </div>
+
+                            </td>
+
+                        </tr>
+
+
+                        <div
+                            class="modal fade"
+                            id="modal{{ app.student.id }}"
+                            tabindex="-1"
+                        >
+
+                            <div class="modal-dialog modal-dialog-centered">
+
+                                <div class="modal-content p-4">
+
+                                    <h4 class="mb-4">
+                                        {{ app.student.first_name }}
+                                        {{ app.student.last_name }}
+                                    </h4>
+
+                                    <p>
+                                        <strong>Email:</strong>
+                                        {{ app.student.user.email }}
+                                    </p>
+
+                                    <p>
+                                        <strong>CGPA:</strong>
+                                        {{ app.student.cgpa }}
+                                    </p>
+
+                                    <p>
+                                        <strong>Graduation Year:</strong>
+                                        {{ app.student.graduation_year }}
+                                    </p>
+
+                                    <p>
+                                        <strong>Resume:</strong>
+
+                                        {% if app.student.resume_path %}
+
+                                            <a
+                                                href="{{ url_for('static', filename=app.student.resume_path.replace('static/', '').replace('\\', '/')) }}"
+                                                target="_blank"
+                                                class="btn btn-sm resume-btn"
+                                            >
+                                                View Resume
+                                            </a>
+
+                                        {% else %}
+
+                                            <span class="student-email">
+                                                No resume uploaded
+                                            </span>
+
+                                        {% endif %}
+                                    </p>
+
+
+                                    <div class="mt-3">
+
+                                        <button
+                                            class="btn btn-secondary"
+                                            data-bs-dismiss="modal"
+                                        >
+                                            Close
+                                        </button>
+
+                                    </div>
+
+                                </div>
+
+                            </div>
+
+                        </div>
+
+                        {% endfor %}
+
+                    </tbody>
+
+                </table>
+
+            </div>
+
+        {% else %}
+
+            <p class="empty-message">
+                No applications have been received yet.
+            </p>
+
+        {% endif %}
+
+    </div>
+
+</div>
+
+{% endblock %}

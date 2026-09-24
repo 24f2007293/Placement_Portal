@@ -1,105 +1,481 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Company Dashboard</title>
-</head>
-<body>
-    {%extends "auth/base_form.html"%}
-    {%block content%}
-                            <nav class="navbar navbar-dark bg-dark px-3">
-                    <div class="d-flex align-items-center justify-content-between w-100 text-white">
-                            <span style="text-align: right;">
-                                Welcome {{ current_user.company_profiles.company_name }} !
-                            </span>
-                            <span style="text-align: left;">
-                                <a href="{{url_for('logout')}}" class="btn btn-danger btn-sm">Logout</a>
-                            </span>
-                    </div>
-                </nav>
-    <div class="container py-4">
-        <div class="d-flex justify-content-between align-items-center mb-4">
-            <div>
-                <h1 class="mb-0">Company Dashboard</h1>
-                <p class="text-muted mb-0">View your upcoming and closed drives below.</p>
-            </div>
-            <a href="{{url_for('create_drive',company_id=current_user.id) }}" class="btn btn-success">
-                Create Drive
+{% extends "auth/Base_form.html" %}
+
+{% block title %}Company Dashboard{% endblock %}
+
+{% block content %}
+
+<style>
+
+    body {
+        background: linear-gradient(
+            120deg,
+            #102a32 0%,
+            #193943 45%,
+            #2b5968 100%
+        );
+        min-height: 100vh;
+        color: white;
+        font-family: Arial, Helvetica, sans-serif;
+    }
+
+    /* Navbar */
+    .company-navbar {
+        width: 90%;
+        margin: 25px auto 0;
+        padding: 16px 25px;
+        background-color: #212529;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.20);
+    }
+
+    .welcome-text {
+        font-size: 18px;
+        font-weight: 500;
+    }
+
+    .company-navbar .btn {
+        border-radius: 20px;
+        padding: 6px 14px;
+        margin-left: 6px;
+        transition: 0.2s;
+    }
+
+    .company-navbar .btn-outline-light:hover {
+        background-color: white;
+        color: #212529;
+    }
+
+    .company-container {
+        width: 88%;
+        max-width: 1250px;
+        margin: 55px auto;
+    }
+
+    .dashboard-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 45px;
+    }
+
+    .dashboard-header h1 {
+        font-size: 42px;
+        font-weight: 700;
+        margin-bottom: 8px;
+    }
+
+    .dashboard-header p {
+        color: #d0d8dc;
+        font-size: 17px;
+        margin: 0;
+    }
+
+    .create-drive-btn {
+        background-color: #21d4fd;
+        color: #102a32;
+        border: none;
+        border-radius: 22px;
+        padding: 9px 20px;
+        font-weight: 600;
+        text-decoration: none;
+        transition: 0.2s;
+    }
+
+    .create-drive-btn:hover {
+        background-color: #7be4fb;
+        color: #102a32;
+    }
+
+    /* Drive cards */
+    .dashboard-section {
+        background-color: rgba(55, 80, 90, 0.90);
+        padding: 28px;
+        border-radius: 15px;
+        margin-bottom: 35px;
+        box-shadow: 0 5px 15px rgba(0,0,0,0.14);
+    }
+
+    .section-title {
+        font-size: 24px;
+        font-weight: 600;
+        margin-bottom: 22px;
+        color: white;
+    }
+
+    /* Tables */
+    .custom-table {
+        width: 100%;
+        margin: 0;
+        border-radius: 10px;
+        overflow: hidden;
+
+        --bs-table-bg: #314b55;
+        --bs-table-color: #ffffff;
+        --bs-table-striped-bg: #38545f;
+        --bs-table-striped-color: #ffffff;
+        --bs-table-hover-bg: #405e69;
+        --bs-table-hover-color: #ffffff;
+
+        border-color: rgba(255, 255, 255, 0.08);
+    }
+
+    .custom-table thead {
+        background-color: #212529;
+    }
+
+    .custom-table th {
+        background-color: #212529;
+        color: #ffffff;
+        padding: 15px;
+        font-weight: 600;
+        border: none;
+    }
+
+    .custom-table td {
+        color: #f1f5f7;
+        padding: 14px 15px;
+        vertical-align: middle;
+        border-color: rgba(255, 255, 255, 0.08);
+    }
+
+        .custom-table tbody tr {
+            background-color: rgba(255,255,255,0.04);
+            transition: 0.2s;
+        }
+
+        .custom-table tbody tr:hover {
+            background-color: rgba(255,255,255,0.09);
+        }
+
+    .view-btn {
+        border: 1px solid #21d4fd;
+        color: #21d4fd;
+        background: transparent;
+        border-radius: 20px;
+        padding: 6px 14px;
+        text-decoration: none;
+        display: inline-block;
+        transition: 0.2s;
+    }
+
+    .view-btn:hover {
+        background-color: #21d4fd;
+        color: #102a32;
+    }
+
+    .complete-btn {
+        border: 1px solid #55efc4;
+        color: #55efc4;
+        background: transparent;
+        border-radius: 20px;
+        padding: 6px 14px;
+        transition: 0.2s;
+    }
+
+    .complete-btn:hover {
+        background-color: #55efc4;
+        color: #102a32;
+    }
+
+    .status-badge {
+        display: inline-block;
+        padding: 6px 12px;
+        border-radius: 15px;
+        font-size: 13px;
+        font-weight: 600;
+    }
+
+    .pending-badge {
+        background-color: rgba(255,193,7,0.18);
+        color: #ffc107;
+    }
+
+    .closed-badge {
+        background-color: rgba(150,150,150,0.20);
+        color: #d0d8dc;
+    }
+
+    .empty-message {
+        color: #bdc8cc;
+        margin-bottom: 0;
+    }
+
+    @media (max-width: 768px) {
+
+        .company-navbar {
+            width: 95%;
+        }
+
+        .company-navbar > div {
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .company-container {
+            width: 95%;
+            margin-top: 40px;
+        }
+
+        .dashboard-header {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 20px;
+        }
+
+        .dashboard-header h1 {
+            font-size: 32px;
+        }
+
+        .dashboard-section {
+            overflow-x: auto;
+        }
+    }
+
+</style>
+
+
+<!-- Navbar -->
+<nav class="navbar company-navbar">
+
+    <div class="d-flex align-items-center justify-content-between w-100 text-white">
+
+        <span class="welcome-text">
+            Welcome {{ current_user.company_profiles.company_name }} !
+        </span>
+
+        <span>
+
+            <a
+                href="{{ url_for('edit_cprofile') }}"
+                class="btn btn-outline-light btn-sm"
+            >
+                Edit Profile
             </a>
+
+            <a
+                href="{{ url_for('logout') }}"
+                class="btn btn-danger btn-sm"
+            >
+                Logout
+            </a>
+
+        </span>
+
+    </div>
+
+</nav>
+
+
+<div class="company-container">
+
+    <div class="dashboard-header">
+
+        <div>
+
+            <h1>Company Dashboard</h1>
+
+            <p>
+                Manage your placement drives and track their status.
+            </p>
+
         </div>
 
-        <section class="mb-5">
-            <div class="d-flex justify-content-between align-items-center mb-3">
-                <h2 class="mb-0">Upcoming Drives</h2>
-            </div>
-            {% if upcoming_drives %}
-                <div class="table-responsive">
-                    <table class="table table-bordered table-striped align-middle">
-                        <thead class="table-light">
-                            <tr>
-                                <th style="width: 80px;">Sr No.</th>
-                                <th>Drive Name</th>
-                                <th style="width: 240px;">Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {% for drive in upcoming_drives %}
-                                <tr>
-                                    <td>{{ loop.index }}</td>
-                                    <td>{{ drive.drive_name }}</td>
-                                    <td>
-                                        <a href="{{ url_for('company_drive_details', drive_id=drive.id) }}" class="btn btn-sm btn-info me-2">View Details</a>
-                                        {% if drive.drive_status == 'active' %}
-                                            <form action="{{ url_for('toggle_drive_status', drive_id=drive.id) }}" method="post" class="d-inline">
-                                                <button type="submit" class="btn btn-sm btn-primary me-2">Mark as Complete</button>
-                                            </form>
-                                        {% else %}
-                                            <span class="badge bg-secondary">{{ drive.drive_status|capitalize }} - Awaiting approval</span>
-                                        {% endif %}
-                                    </td>
-                                </tr>
-                            {% endfor %}
-                        </tbody>
-                    </table>
-                </div>
-            {% else %}
-                <p class="text-muted">No upcoming drives found.</p>
-            {% endif %}
-        </section>
+        <a
+            href="{{ url_for('create_drive', company_id=current_user.id) }}"
+            class="create-drive-btn"
+        >
+            + Create Drive
+        </a>
 
-        <section>
-            <div class="d-flex justify-content-between align-items-center mb-3">
-                <h2 class="mb-0">Closed Drives</h2>
-            </div>
-            {% if closed_drives %}
-                <div class="table-responsive">
-                    <table class="table table-bordered table-striped align-middle">
-                        <thead class="table-light">
-                            <tr>
-                                <th style="width: 80px;">Sr No.</th>
-                                <th>Drive Name</th>
-                                <th style="width: 260px;">Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {% for drive in closed_drives %}
-                                <tr>
-                                    <td>{{ loop.index }}</td>
-                                    <td>{{ drive.drive_name }}</td>
-                                    <td>
-                                        <a href="{{ url_for('company_drive_details', drive_id=drive.id) }}" class="btn btn-sm btn-info me-2">View Details</a>
-                                        <span class="badge bg-secondary">Closed</span>
-                                    </td>
-                                </tr>
-                                
-                            {% endfor %}
-                        </tbody>
-                    </table>
-                </div>
-            {% else %}
-                <p class="text-muted">No closed drives yet.</p>
-            {% endif %}
-        </section>
     </div>
-    {%endblock%}
+
+
+    <!-- Upcoming drives -->
+    <section class="dashboard-section">
+
+        <h2 class="section-title">
+            Upcoming Drives
+        </h2>
+
+        {% if upcoming_drives %}
+
+            <div class="table-responsive">
+
+                <table class="table custom-table">
+
+                    <thead>
+
+                        <tr>
+
+                            <th style="width: 80px;">
+                                Sr No.
+                            </th>
+
+                            <th>
+                                Drive Name
+                            </th>
+
+                            <th style="width: 360px;">
+                                Actions
+                            </th>
+
+                        </tr>
+
+                    </thead>
+
+                    <tbody>
+
+                        {% for drive in upcoming_drives %}
+
+                        <tr>
+
+                            <td>
+                                {{ loop.index }}
+                            </td>
+
+                            <td>
+                                {{ drive.drive_name }}
+                            </td>
+
+                            <td>
+
+                                <a
+                                    href="{{ url_for('company_drive_details', drive_id=drive.id) }}"
+                                    class="view-btn me-2"
+                                >
+                                    View Details
+                                </a>
+
+                                {% if drive.drive_status == 'active' %}
+
+                                    <form
+                                        action="{{ url_for('toggle_drive_status', drive_id=drive.id) }}"
+                                        method="post"
+                                        class="d-inline"
+                                    >
+
+                                        <button
+                                            type="submit"
+                                            class="complete-btn"
+                                        >
+                                            Mark as Complete
+                                        </button>
+
+                                    </form>
+
+                                {% else %}
+
+                                    <span class="status-badge pending-badge">
+                                        {{ drive.drive_status|capitalize }}
+                                        - Awaiting approval
+                                    </span>
+
+                                {% endif %}
+
+                            </td>
+
+                        </tr>
+
+                        {% endfor %}
+
+                    </tbody>
+
+                </table>
+
+            </div>
+
+        {% else %}
+
+            <p class="empty-message">
+                No upcoming drives found.
+            </p>
+
+        {% endif %}
+
+    </section>
+
+
+    <!-- Closed drives -->
+    <section class="dashboard-section">
+
+        <h2 class="section-title">
+            Closed Drives
+        </h2>
+
+        {% if closed_drives %}
+
+            <div class="table-responsive">
+
+                <table class="table custom-table">
+
+                    <thead>
+
+                        <tr>
+
+                            <th style="width: 80px;">
+                                Sr No.
+                            </th>
+
+                            <th>
+                                Drive Name
+                            </th>
+
+                            <th style="width: 300px;">
+                                Actions
+                            </th>
+
+                        </tr>
+
+                    </thead>
+
+                    <tbody>
+
+                        {% for drive in closed_drives %}
+
+                        <tr>
+
+                            <td>
+                                {{ loop.index }}
+                            </td>
+
+                            <td>
+                                {{ drive.drive_name }}
+                            </td>
+
+                            <td>
+
+                                <a
+                                    href="{{ url_for('company_drive_details', drive_id=drive.id) }}"
+                                    class="view-btn me-2"
+                                >
+                                    View Details
+                                </a>
+
+                                <span class="status-badge closed-badge">
+                                    Closed
+                                </span>
+
+                            </td>
+
+                        </tr>
+
+                        {% endfor %}
+
+                    </tbody>
+
+                </table>
+
+            </div>
+
+        {% else %}
+
+            <p class="empty-message">
+                No closed drives yet.
+            </p>
+
+        {% endif %}
+
+    </section>
+
+</div>
+
+{% endblock %}

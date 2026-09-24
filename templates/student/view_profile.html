@@ -1,66 +1,545 @@
 {% extends "auth/Base_form.html" %}
-{% block title %}My Profile{% endblock %}
-{% block content %}
-<nav class="navbar navbar-dark bg-dark px-3">
-    <div class="d-flex align-items-center justify-content-between w-100 text-white">
-        <span>Welcome {{ current_user.student_profiles.first_name }} !</span>
-        <span>
-            <a href="{{url_for('student_dashboard')}}" class="btn btn-outline-light btn-sm me-2">Dashboard</a>
-            <a href="{{url_for('edit_sprofile')}}" class="btn btn-outline-light btn-sm me-2">Edit Profile</a>
-            <a href="{{url_for('logout')}}" class="btn btn-danger btn-sm">Logout</a>
-        </span>
-    </div>
-</nav>
 
-<div class="container mt-4">
-    <h1>My Profile</h1>
-    <hr>
-    
-    <div class="row">
+{% block title %}My Profile{% endblock %}
+
+{% block content %}
+
+<style>
+
+    body {
+        background: linear-gradient(
+            120deg,
+            #102a32 0%,
+            #193943 45%,
+            #2b5968 100%
+        );
+        min-height: 100vh;
+        color: white;
+        font-family: Arial, Helvetica, sans-serif;
+    }
+
+    /* =========================
+       NAVBAR
+    ========================== */
+
+    .profile-navbar {
+        width: 90%;
+        margin: 25px auto 0;
+        padding: 16px 25px;
+        background-color: #212529;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.20);
+    }
+
+    .profile-navbar .welcome-text {
+        font-size: 18px;
+        font-weight: 500;
+    }
+
+    .profile-navbar .btn {
+        border-radius: 20px;
+        padding: 6px 14px;
+        margin-left: 5px;
+        transition: 0.2s;
+    }
+
+    .profile-navbar .btn-outline-light:hover {
+        background-color: white;
+        color: #212529;
+    }
+
+    /* =========================
+       MAIN
+    ========================== */
+
+    .profile-container {
+        width: 88%;
+        max-width: 1150px;
+        margin: 55px auto;
+    }
+
+    .profile-header {
+        text-align: center;
+        margin-bottom: 40px;
+    }
+
+    .profile-header h1 {
+        font-size: 42px;
+        font-weight: 700;
+        margin-bottom: 8px;
+    }
+
+    .profile-header p {
+        font-size: 17px;
+        color: #d0d8dc;
+        margin: 0;
+    }
+
+    /* =========================
+       CARDS
+    ========================== */
+
+    .profile-card {
+        background-color: rgba(55, 80, 90, 0.90);
+        border: none;
+        border-radius: 15px;
+        padding: 28px;
+        color: white;
+        box-shadow: 0 5px 15px rgba(0,0,0,0.14);
+        height: 100%;
+    }
+
+    .profile-card h5 {
+        font-size: 22px;
+        font-weight: 600;
+        margin-bottom: 24px;
+        color: white;
+    }
+
+    .profile-card p {
+        color: #d9e1e4;
+        margin-bottom: 16px;
+    }
+
+    .profile-card strong {
+        color: white;
+        font-weight: 600;
+    }
+
+    /* =========================
+       INFORMATION ROWS
+    ========================== */
+
+    .info-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 20px;
+
+        padding: 13px 0;
+
+        border-bottom: 1px solid rgba(255,255,255,0.08);
+    }
+
+    .info-row:last-child {
+        border-bottom: none;
+    }
+
+    .info-label {
+        color: #bfcbd0;
+        font-weight: 500;
+    }
+
+    .info-value {
+        color: white;
+        font-weight: 600;
+        text-align: right;
+    }
+
+    /* =========================
+       BUTTONS
+    ========================== */
+
+    .action-btn {
+        border: 1px solid #21d4fd;
+        color: #21d4fd;
+        background: transparent;
+
+        border-radius: 20px;
+
+        padding: 7px 18px;
+
+        text-decoration: none;
+
+        transition: 0.2s;
+    }
+
+    .action-btn:hover {
+        background-color: #21d4fd;
+        color: #102a32;
+    }
+
+    .edit-main-btn {
+        background-color: #21d4fd;
+        color: #102a32;
+        border: none;
+
+        border-radius: 20px;
+
+        padding: 8px 22px;
+
+        font-weight: 600;
+
+        text-decoration: none;
+
+        transition: 0.2s;
+    }
+
+    .edit-main-btn:hover {
+        background-color: #7be4fb;
+        color: #102a32;
+    }
+
+    /* =========================
+       BADGES
+    ========================== */
+
+    .status-badge {
+        padding: 6px 12px;
+        border-radius: 16px;
+        font-size: 13px;
+        font-weight: 600;
+    }
+
+    .active-badge {
+        background-color: rgba(46,204,113,0.18);
+        color: #55efc4;
+    }
+
+    .inactive-badge {
+        background-color: rgba(255,80,80,0.18);
+        color: #ff7675;
+    }
+
+    .warning-badge {
+        background-color: rgba(255,193,7,0.18);
+        color: #ffc107;
+    }
+
+    /* =========================
+       QUICK LINKS
+    ========================== */
+
+    .quick-link {
+        display: block;
+
+        width: 100%;
+
+        border: 1px solid #21d4fd;
+
+        color: #21d4fd;
+
+        border-radius: 20px;
+
+        padding: 8px 12px;
+
+        text-decoration: none;
+
+        text-align: center;
+
+        margin-bottom: 10px;
+
+        transition: 0.2s;
+    }
+
+    .quick-link:hover {
+        background-color: #21d4fd;
+        color: #102a32;
+    }
+
+    /* =========================
+       MOBILE
+    ========================== */
+
+    @media (max-width: 768px) {
+
+        .profile-navbar {
+            width: 95%;
+        }
+
+        .profile-navbar > div {
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .profile-navbar span {
+            text-align: center;
+        }
+
+        .profile-container {
+            width: 95%;
+            margin-top: 40px;
+        }
+
+        .profile-header h1 {
+            font-size: 32px;
+        }
+
+        .info-row {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 5px;
+        }
+
+        .info-value {
+            text-align: left;
+        }
+
+    }
+
+</style>
+
+
+<!-- =========================
+     NAVBAR
+========================= -->
+
+<nav class="navbar profile-navbar">
+
+    <div class="d-flex align-items-center justify-content-between w-100 text-white">
+
+        <span class="welcome-text">
+            Welcome {{ current_user.student_profiles.first_name }} !
+        </span>
+
+        <span>
+
+            <a
+                href="{{ url_for('student_dashboard') }}"
+                class="btn btn-outline-light btn-sm"
+            >
+                Dashboard
+            </a>
+
+            <a
+                href="{{ url_for('application_history') }}"
+                class="btn btn-outline-light btn-sm"
+            >
+                Application History
+            </a>
+
+            <a
+                href="{{ url_for('edit_sprofile') }}"
+                class="btn btn-outline-light btn-sm"
+            >
+                Edit Profile
+            </a>
+
+            <a
+                href="{{ url_for('logout') }}"
+                class="btn btn-danger btn-sm"
+            >
+                Logout
+            </a>
+
+        </span>
+
+    </div>
+
+</nav>
+<!-- =========================
+     MAIN CONTENT
+========================= -->
+
+<div class="profile-container">
+
+
+    <div class="profile-header">
+
+        <h1>My Profile</h1>
+
+        <p>
+            View and manage your student information
+        </p>
+
+    </div>
+
+
+    <div class="row g-4">
+
+
+        <!-- =====================
+             PERSONAL INFORMATION
+        ====================== -->
+
         <div class="col-md-8">
-            <div class="card p-4 mb-4">
-                <h5 class="card-title">Personal Information</h5>
-                <p><strong>First Name:</strong> {{ student.first_name }}</p>
-                <p><strong>Last Name:</strong> {{ student.last_name }}</p>
-                <p><strong>Department:</strong> {{ student.department_name }}</p>
-                <p><strong>Graduation Year:</strong> {{ student.graduation_year }}</p>
-                <p><strong>CGPA:</strong> {{ student.cgpa }}</p>
-                {% if student.resume_path %}
-                    <p><strong>Resume:</strong> <a href="/{{ student.resume_path }}" target="_blank" class="btn btn-sm btn-outline-primary">Download Resume</a></p>
-                {% else %}
-                    <p><strong>Resume:</strong> <span class="badge bg-warning">Not Uploaded</span></p>
-                {% endif %}
-                <div class="mt-3">
-                    <a href="{{url_for('edit_sprofile')}}" class="btn btn-primary">Edit Profile</a>
+
+            <div class="profile-card">
+
+                <h5>
+                    Personal Information
+                </h5>
+
+
+                <div class="info-row">
+
+                    <span class="info-label">
+                        First Name
+                    </span>
+
+                    <span class="info-value">
+                        {{ student.first_name }}
+                    </span>
+
                 </div>
+
+
+                <div class="info-row">
+
+                    <span class="info-label">
+                        Last Name
+                    </span>
+
+                    <span class="info-value">
+                        {{ student.last_name }}
+                    </span>
+
+                </div>
+
+
+                <div class="info-row">
+
+                    <span class="info-label">
+                        Department
+                    </span>
+
+                    <span class="info-value">
+                        {{ student.department_name }}
+                    </span>
+
+                </div>
+
+
+                <div class="info-row">
+
+                    <span class="info-label">
+                        Graduation Year
+                    </span>
+
+                    <span class="info-value">
+                        {{ student.graduation_year }}
+                    </span>
+
+                </div>
+
+
+                <div class="info-row">
+
+                    <span class="info-label">
+                        CGPA
+                    </span>
+
+                    <span class="info-value">
+                        {{ student.cgpa }}
+                    </span>
+
+                </div>
+
+
+                <div class="info-row">
+
+                    <span class="info-label">
+                        Resume
+                    </span>
+
+                    <span class="info-value">
+
+                        {% if student.resume_path %}
+
+                            <a
+                                href="/{{ student.resume_path }}"
+                                target="_blank"
+                                class="action-btn"
+                            >
+                                View Resume
+                            </a>
+
+                        {% else %}
+
+                            <span class="status-badge warning-badge">
+                                Not Uploaded
+                            </span>
+
+                        {% endif %}
+
+                    </span>
+
+                </div>
+
+
+                <div class="mt-4">
+
+                    <a
+                        href="{{ url_for('edit_sprofile') }}"
+                        class="edit-main-btn"
+                    >
+                        Edit Profile
+                    </a>
+
+                </div>
+
             </div>
+
         </div>
+
+
+
+        <!-- =====================
+             RIGHT COLUMN
+        ====================== -->
 
         <div class="col-md-4">
-            <div class="card p-4">
-                <h5 class="card-title">Account Information</h5>
-                <p class="mb-0"><strong>Email:</strong></p>
-                <p>{{ current_user.email }}</p>
-                <p class="mb-0"><strong>User ID:</strong></p>
-                <p>{{ current_user.id }}</p>
-                <p class="mb-0"><strong>Account Status:</strong></p>
-                <p>
-                    {% if current_user.is_approved %}
-                        <span class="badge bg-success">Active</span>
-                    {% else %}
-                        <span class="badge bg-danger">Inactive</span>
-                    {% endif %}
-                </p>
-            </div>
 
-            <div class="card p-4 mt-3">
-                <h5 class="card-title">Quick Links</h5>
-                <ul class="list-unstyled">
-                    <li><a href="{{url_for('student_dashboard')}}" class="btn btn-outline-primary btn-sm w-100 mb-2">Dashboard</a></li>
-                    <li><a href="{{url_for('application_history')}}" class="btn btn-outline-primary btn-sm w-100">Application History</a></li>
-                </ul>
+
+            <!-- ACCOUNT INFORMATION -->
+
+            <div class="profile-card mb-4">
+
+                <h5>
+                    Account Information
+                </h5>
+
+
+                <div class="info-row">
+
+                    <span class="info-label">
+                        Email
+                    </span>
+
+                    <span class="info-value">
+                        {{ current_user.email }}
+                    </span>
+
+                </div>
+
+
+                <div class="info-row">
+
+                    <span class="info-label">
+                        User ID
+                    </span>
+
+                    <span class="info-value">
+                        {{ current_user.id }}
+                    </span>
+
+                </div>
+
+
+                <div class="info-row">
+
+                    <span class="info-label">
+                        Account Status
+                    </span>
+
+                    <span class="info-value">
+
+                        {% if current_user.is_approved %}
+
+                            <span class="status-badge active-badge">
+                                Active
+                            </span>
+
+                        {% else %}
+
+                            <span class="status-badge inactive-badge">
+                                Inactive
+                            </span>
+
+                        {% endif %}
+
+                    </span>
+
+                </div>
+
             </div>
-        </div>
-    </div>
-</div>
 {% endblock %}

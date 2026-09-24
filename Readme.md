@@ -20,5 +20,5 @@ started working on the 3rd milestone
 -made the required student tables in the html file for student where we can see companies and drives
 
 ## 6 April
--Bootstrapped the whole application and made some changes with the flash warnings
+-Bootstrapped the whole application and made some changes with the flash warnings.
 
